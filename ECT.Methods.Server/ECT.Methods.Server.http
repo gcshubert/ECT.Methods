@@ -1,0 +1,6 @@
+@ECT.Methods.Server_HostAddress = http://localhost:5008
+
+GET {{ECT.Methods.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

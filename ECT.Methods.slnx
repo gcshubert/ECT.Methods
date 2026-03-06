@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ect.methods.client/ect.methods.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="ECT.Methods.Server/ECT.Methods.Server.csproj" />
+</Solution>

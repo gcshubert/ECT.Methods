@@ -1,0 +1,43 @@
+/* ── Global dark theme ─────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #020617;
+  color: #e2e8f0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 14px;
+}
+
+/* Angular Material dark overrides */
+.mat-drawer-container,
+.mat-sidenav-container  { background: #020617 !important; color: #e2e8f0 !important; }
+.mat-sidenav            { background: #0f172a !important; }
+.mat-toolbar            { background: #0f172a !important; color: #f1f5f9 !important; }
+
+.mdc-tab__text-label    { color: #94a3b8 !important; }
+.mdc-tab--active .mdc-tab__text-label { color: #38bdf8 !important; }
+.mdc-tab-indicator__content--underline { border-color: #38bdf8 !important; }
+
+.mat-mdc-card           { background: #1e293b !important; color: #e2e8f0 !important; }
+.mat-mdc-card-title     { color: #f1f5f9 !important; }
+.mat-mdc-card-subtitle  { color: #64748b !important; }
+
+.mat-mdc-form-field-subscript-wrapper { display: none; }
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: #334155 !important;
+}
+.mdc-text-field--focused .mdc-notched-outline__leading,
+.mdc-text-field--focused .mdc-notched-outline__notch,
+.mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: #38bdf8 !important;
+}
+.mat-mdc-input-element  { color: #e2e8f0 !important; }
+.mat-mdc-floating-label { color: #64748b !important; }
+
+.mat-mdc-dialog-container { background: #1e293b !important; color: #e2e8f0 !important; }
+.mat-mdc-dialog-title      { color: #f1f5f9 !important; }
+
+/* Monospace utility */
+.mono { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
