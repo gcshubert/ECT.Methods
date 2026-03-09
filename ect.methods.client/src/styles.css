@@ -39,5 +39,14 @@ html, body {
 .mat-mdc-dialog-container { background: #1e293b !important; color: #e2e8f0 !important; }
 .mat-mdc-dialog-title      { color: #f1f5f9 !important; }
 
+/* Dark dialog panel override (used by VariantEditorDialog) */
+.dark-dialog .mat-mdc-dialog-container,
+.dark-dialog .mdc-dialog__surface {
+  background: #0f172a !important;
+  border: 1px solid #1e293b;
+  border-radius: 8px !important;
+  padding: 0 !important;
+}
+
 /* Monospace utility */
 .mono { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }

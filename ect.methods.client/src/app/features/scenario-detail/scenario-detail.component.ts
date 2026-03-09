@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EctApiService } from '../../core/services/ect-api.service';
 import { Scenario, EctParameters, ScientificValue } from '../../core/models/types';
 import { ScientificPipe } from '../../shared/pipes/scientific.pipe';
+import { ParamDerivationComponent } from './param-derivation.component';
 
 /** Mini-form for a single ScientificValue (coefficient + exponent) */
 function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValue) {
@@ -29,6 +30,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
     CommonModule, RouterLink, ReactiveFormsModule, ScientificPipe,
     MatTabsModule, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSnackBarModule, MatProgressSpinnerModule,
+    ParamDerivationComponent,
   ],
   template: `
     <div class="detail-page">
@@ -61,7 +63,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                     </div>
                     <div class="info-row">
                       <span class="info-label">Created</span>
-                      <span class="info-value">{{ scenario.createdAt | date:'long' }}</span>
+                      <span class="info-value">{{ scenario.createdDate | date:'long' }}</span>
                     </div>
                     <div class="info-row">
                       <span class="info-label">Analysis status</span>
@@ -134,6 +136,30 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
             </div>
           </mat-tab>
 
+          <!-- ── Derivation tab ── -->
+          <mat-tab label="Derivation">
+            <div class="tab-content">
+              <p class="tab-hint">
+                Document the derivation chain for each ECT parameter.
+                Each step multiplies, divides, adds, or raises the running total.
+              </p>
+
+              <div class="derivation-grid">
+                @for (param of paramDefs; track param.key) {
+                  <mat-card class="deriv-card">
+                    <mat-card-content>
+                      <app-param-derivation
+                        [scenarioId]="scenario.id"
+                        [paramKey]="param.key"
+                        [paramSymbol]="param.symbol"
+                      />
+                    </mat-card-content>
+                  </mat-card>
+                }
+              </div>
+            </div>
+          </mat-tab>
+
         </mat-tab-group>
       }
 
@@ -175,10 +201,20 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
 
     .form-actions   { display: flex; justify-content: flex-end; }
     .loading-state  { display: flex; justify-content: center; padding: 3rem; }
+
+    /* ── Derivation tab ── */
+    .derivation-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .deriv-card {
+      background: #1e293b !important;
+      border: 1px solid #334155 !important;
+    }
   `],
 })
 export class ScenarioDetailComponent implements OnInit {
-  // Angular 17+ input() signal — matches route param via withComponentInputBinding()
   id = input.required<string>();
 
   private api      = inject(EctApiService);
@@ -191,17 +227,17 @@ export class ScenarioDetailComponent implements OnInit {
   paramForm: ReturnType<FormBuilder['group']> | null = null;
 
   readonly paramDefs = [
-    { key: 'e', symbol: 'E', label: 'Energy',           description: 'Usable energy available to the process' },
-    { key: 'c', symbol: 'C', label: 'Control',          description: 'Available control capacity' },
-    { key: 'k', symbol: 'k', label: 'Complexity',       description: 'Complexity constant for the target outcome' },
-    { key: 't', symbol: 'T', label: 'Time',             description: 'Time available for the process' },
+    { key: 'energy', symbol: 'E', label: 'Energy',     description: 'Usable energy available to the process' },
+    { key: 'control', symbol: 'C', label: 'Control',    description: 'Available control capacity' },
+    { key: 'complexity', symbol: 'k', label: 'Complexity', description: 'Complexity constant for the target outcome' },
+    { key: 'timeAvailable', symbol: 'T', label: 'Time',       description: 'Time available for the process' },
   ];
 
   ngOnInit() {
     this.api.getScenario(+this.id()).subscribe({
       next: (s) => {
         this.scenario = s;
-        this.buildForm(s.parameters!);
+        if (s.parameters) this.buildForm(s.parameters);
         this.loading = false;
       },
       error: () => { this.loading = false; },
@@ -210,10 +246,10 @@ export class ScenarioDetailComponent implements OnInit {
 
   buildForm(p: EctParameters) {
     this.paramForm = this.fb.group({
-      e: svGroup(this.fb, p.e),
-      c: svGroup(this.fb, p.c),
-      k: svGroup(this.fb, p.k),
-      t: svGroup(this.fb, p.t),
+      energy: svGroup(this.fb, p.energy),
+      control: svGroup(this.fb, p.control),
+      complexity: svGroup(this.fb, p.complexity),
+      timeAvailable: svGroup(this.fb, p.timeAvailable),
     });
   }
 

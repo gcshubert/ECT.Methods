@@ -56,13 +56,6 @@ export class CreateScenarioDialogComponent {
     this.api.createScenario({
       name: name!,
       description: description!,
-      // Default parameters — user edits them in Scenario Detail
-      parameters: {
-        e: { coefficient: 1, exponent: 0 },
-        c: { coefficient: 1, exponent: 0 },
-        k: { coefficient: 1, exponent: 0 },
-        t: { coefficient: 1, exponent: 0 },
-      },
     }).subscribe({
       next: (created) => this.ref.close(created),
       error: ()        => { this.saving = false; },

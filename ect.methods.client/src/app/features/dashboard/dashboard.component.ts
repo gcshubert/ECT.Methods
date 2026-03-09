@@ -72,7 +72,7 @@ import { Scenario } from '../../core/models/types';
                   <mat-icon class="scenario-icon">biotech</mat-icon>
                   <div class="scenario-info">
                     <span class="scenario-name">{{ s.name }}</span>
-                    <span class="scenario-date">{{ s.createdAt | date:'mediumDate' }}</span>
+                    <span class="scenario-date">{{ s.createdDate | date:'mediumDate' }}</span>
                   </div>
                   <span class="badge" [class.badge-deficit]="s.hasAnalysis" [class.badge-pending]="!s.hasAnalysis">
                     {{ s.hasAnalysis ? 'Analysed' : 'Pending' }}

@@ -58,7 +58,7 @@ import { CreateScenarioDialogComponent } from './create-scenario-dialog.componen
                   <div class="row-info" [routerLink]="['/scenarios', s.id]" style="cursor:pointer; flex:1">
                     <span class="row-name">{{ s.name }}</span>
                     <span class="row-desc">{{ s.description }}</span>
-                    <span class="row-date">Created {{ s.createdAt | date:'mediumDate' }}</span>
+                    <span class="row-date">Created {{ s.createdDate | date:'mediumDate' }}</span>
                   </div>
                   <span class="badge" [class.badge-analysed]="s.hasAnalysis" [class.badge-pending]="!s.hasAnalysis">
                     {{ s.hasAnalysis ? 'Analysed' : 'Pending' }}

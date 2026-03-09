@@ -76,8 +76,10 @@ import { MatButtonModule } from '@angular/material/button';
     .active-link { background: rgba(56,189,248,0.1) !important; border-left: 3px solid #38bdf8; }
 
     /* Global dark theme overrides */
-    :host ::ng-deep .mat-mdc-list-item { color: #94a3b8 !important; }
-    :host ::ng-deep .mat-icon { color: #64748b; }
+    :host ::ng-deep .mat-mdc-list-item { color: #cbd5e1 !important; }
+    :host ::ng-deep .mat-mdc-list-item .mdc-list-item__primary-text { color: #cbd5e1 !important; }
+    :host ::ng-deep .mat-mdc-list-item .mat-icon { color: #94a3b8 !important; }
+    :host ::ng-deep .active-link .mdc-list-item__primary-text { color: #38bdf8 !important; }
     :host ::ng-deep .active-link .mat-icon { color: #38bdf8 !important; }
   `],
 })
