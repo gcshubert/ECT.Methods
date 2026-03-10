@@ -177,11 +177,23 @@ export interface RollupResult {
 }
 
 // ─── Phase 3.5: Process Domains & Parameter Definitions ──────────────────────
+export interface TemplateParameterDefinition {
+  id: number;
+  key: string;
+  symbol: string;
+  label: string;
+  description: string;
+  defaultUnit: string;
+  sortOrder: number;
+  isEctCoreParameter: boolean;
+  seedValue: ScientificValue | null;
+}
+
 export interface ParameterTemplateSummary {
   id: number;
   name: string;
   description: string;
-  parameterCount: number;
+  parameterDefinitions: TemplateParameterDefinition[];
 }
 
 export interface ProcessDomain {

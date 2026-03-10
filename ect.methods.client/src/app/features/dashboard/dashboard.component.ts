@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { Scenario } from '../../core/models/types';
+import { Scenario, ProcessDomain } from '../../core/models/types';
 
 @Component({
   selector: 'app-dashboard',
@@ -69,7 +69,7 @@ import { Scenario } from '../../core/models/types';
             <mat-card class="scenario-row" [routerLink]="['/scenarios', s.id]">
               <mat-card-content>
                 <div class="scenario-row-inner">
-                  <mat-icon class="scenario-icon">biotech</mat-icon>
+                  <mat-icon class="scenario-icon">{{ getDomain(s)?.iconKey ?? "help_outline" }}</mat-icon>
                   <div class="scenario-info">
                     <span class="scenario-name">{{ s.name }}</span>
                     <span class="scenario-date">{{ s.createdDate | date:'mediumDate' }}</span>
@@ -113,6 +113,12 @@ import { Scenario } from '../../core/models/types';
     .badge-deficit   { background: rgba(56,189,248,0.15); color: #38bdf8; }
     .badge-pending   { background: rgba(100,116,139,0.2); color: #94a3b8; }
 
+    .domain-badge       { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem;
+                              border-radius: 9999px; font-size: 0.72rem; font-weight: 500;
+                              background: rgba(100,116,139,0.15); color: #64748b; white-space: nowrap; }
+    .domain-badge--set  { background: rgba(56,189,248,0.08); color: #7dd3fc; }
+    .domain-badge-icon  { font-size: 0.85rem; width: 0.85rem; height: 0.85rem; }
+
     .loading-state, .empty-state { display: flex; justify-content: center; align-items: center;
                                     padding: 3rem; color: #64748b; }
   `],
@@ -121,6 +127,7 @@ export class DashboardComponent implements OnInit {
   private api = inject(EctApiService);
 
   scenarios: Scenario[] = [];
+  domains: ProcessDomain[] = [];
   loading = true;
 
   get recentScenarios() { return this.scenarios.slice(0, 5); }
@@ -128,9 +135,14 @@ export class DashboardComponent implements OnInit {
   get deficitCount()    { return this.analysedCount; }
 
   ngOnInit() {
+    this.api.getProcessDomains().subscribe(d => this.domains = d);
     this.api.getScenarios().subscribe({
       next: (data) => { this.scenarios = data; this.loading = false; },
       error: ()     => { this.loading = false; },
     });
+  }
+
+  getDomain(s: Scenario): ProcessDomain | null {
+    return this.domains.find(d => d.id === s.processDomainId) ?? null;
   }
 }

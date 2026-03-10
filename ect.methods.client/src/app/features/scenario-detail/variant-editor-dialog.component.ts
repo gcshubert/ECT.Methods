@@ -363,11 +363,11 @@ interface VariantStepRow {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #475569;
+      color: #94a3b8;
     }
     .panel-hint {
       font-size: 0.7rem;
-      color: #334155;
+      color: #64748b;
       font-style: italic;
     }
     .add-variant-btn { color: #475569 !important; width: 28px; height: 28px; }
@@ -390,8 +390,8 @@ interface VariantStepRow {
     .variant-icon { font-size: 1rem; width: 1rem; height: 1rem; color: #475569; }
     .variant-icon--active { color: #38bdf8 !important; }
     .variant-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .variant-name { font-size: 0.8rem; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .variant-meta { font-size: 0.68rem; color: #475569; }
+    .variant-name { font-size: 0.8rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .variant-meta { font-size: 0.68rem; color: #64748b; }
     .delete-variant-btn {
       width: 24px; height: 24px;
       color: #334155 !important;
@@ -466,7 +466,7 @@ interface VariantStepRow {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.07em;
-      color: #475569;
+      color: #64748b;
       border-bottom: 1px solid #1e293b;
       white-space: nowrap;
     }

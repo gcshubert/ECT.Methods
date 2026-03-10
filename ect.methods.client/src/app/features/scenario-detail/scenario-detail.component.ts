@@ -14,6 +14,7 @@ import { EctApiService } from '../../core/services/ect-api.service';
 import { Scenario, EctParameters, ScientificValue } from '../../core/models/types';
 import { ScientificPipe } from '../../shared/pipes/scientific.pipe';
 import { ParamDerivationComponent } from './param-derivation.component';
+import { DomainPickerComponent } from './domain-picker.component';
 
 /** Mini-form for a single ScientificValue (coefficient + exponent) */
 function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValue) {
@@ -31,6 +32,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
     MatTabsModule, MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSnackBarModule, MatProgressSpinnerModule,
     ParamDerivationComponent,
+    DomainPickerComponent,
   ],
   template: `
     <div class="detail-page">
@@ -73,6 +75,15 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                       </span>
                     </div>
                   </div>
+
+                  <div style="margin-top:1.25rem">
+                    <app-domain-picker
+                      [scenarioId]="scenario.id"
+                      [processDomainId]="scenario.processDomainId"
+                      (domainApplied)="onDomainApplied($event)"
+                    />
+                  </div>
+
                   @if (scenario.hasAnalysis) {
                     <a mat-flat-button color="primary"
                        [routerLink]="['/scenarios', scenario.id, 'analysis']"
@@ -256,6 +267,18 @@ export class ScenarioDetailComponent implements OnInit {
   getParamValue(key: string): ScientificValue {
     const g = this.paramForm?.get(key)?.value;
     return g ?? { coefficient: 0, exponent: 0 };
+  }
+
+  onDomainApplied(event: { domainId: number; templateApplied: boolean }) {
+    // Refresh scenario to pick up updated processDomainId
+    this.api.getScenario(+this.id()).subscribe({
+      next: (s) => {
+        this.scenario = s;
+        if (event.templateApplied && s.parameters) {
+          this.buildForm(s.parameters);
+        }
+      },
+    });
   }
 
   saveParams() {

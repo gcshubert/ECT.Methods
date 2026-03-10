@@ -636,24 +636,30 @@ export class ParamDerivationComponent implements OnInit, OnChanges {
 
   // ── Open variant editor ─────────────────────────────────────────────────
   openVariants() {
-    const doc = this.doc();
-    if (!doc) return;
-    const data: VariantEditorDialogData = {
-      scenarioId: this.scenarioId(),
-      paramKey:   this.paramKey(),
-      paramLabel: this.paramSymbol(),
-      doc,
-    };
-    this.dialog.open(VariantEditorDialogComponent, {
-      width: '820px',
-      maxHeight: '90vh',
-      panelClass: 'dark-dialog',
-      data,
-    }).afterClosed().subscribe((updatedVariants) => {
-      if (updatedVariants && this.doc()) {
-        // Refresh doc variants from dialog result
-        this.doc.update(d => d ? { ...d, variants: updatedVariants } : d);
-      }
+    // Always reload fresh doc before opening so step list is current
+    this.api.getDocumentation(this.scenarioId(), this.paramKey()).subscribe({
+      next: (freshDoc) => {
+        this.doc.set(freshDoc);
+        this.rows.set(freshDoc.subParameters.map(s => this.toRow(s)));
+        const data: VariantEditorDialogData = {
+          scenarioId: this.scenarioId(),
+          paramKey:   this.paramKey(),
+          paramLabel: this.paramSymbol(),
+          doc:        freshDoc,
+        };
+        this.dialog.open(VariantEditorDialogComponent, {
+          width: '820px',
+          maxHeight: '90vh',
+          panelClass: 'dark-dialog',
+          data,
+        }).afterClosed().subscribe((updatedVariants) => {
+          if (updatedVariants && this.doc()) {
+            this.doc.update(d => d ? { ...d, variants: updatedVariants } : d);
+          }
+        });
+      },
+      error: () =>
+        this.snackbar.open('Failed to load documentation', 'Dismiss', { duration: 3000 }),
     });
   }
 

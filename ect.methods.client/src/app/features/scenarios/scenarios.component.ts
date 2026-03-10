@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { Scenario } from '../../core/models/types';
+import { Scenario, ProcessDomain } from '../../core/models/types';
 import { CreateScenarioDialogComponent } from './create-scenario-dialog.component';
 
 @Component({
@@ -54,7 +54,7 @@ import { CreateScenarioDialogComponent } from './create-scenario-dialog.componen
             <mat-card class="scenario-row">
               <mat-card-content>
                 <div class="row-inner">
-                  <mat-icon class="row-icon">biotech</mat-icon>
+                  <mat-icon class="row-icon">{{ getDomain(s)?.iconKey ?? "help_outline" }}</mat-icon>
                   <div class="row-info" [routerLink]="['/scenarios', s.id]" style="cursor:pointer; flex:1">
                     <span class="row-name">{{ s.name }}</span>
                     <span class="row-desc">{{ s.description }}</span>
@@ -99,6 +99,12 @@ import { CreateScenarioDialogComponent } from './create-scenario-dialog.componen
     .badge-analysed  { background: rgba(56,189,248,0.15); color: #38bdf8; }
     .badge-pending   { background: rgba(100,116,139,0.2); color: #94a3b8; }
 
+    .domain-badge       { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem;
+                              border-radius: 9999px; font-size: 0.72rem; font-weight: 500;
+                              background: rgba(100,116,139,0.15); color: #64748b; white-space: nowrap; }
+    .domain-badge--set  { background: rgba(56,189,248,0.08); color: #7dd3fc; }
+    .domain-badge-icon  { font-size: 0.85rem; width: 0.85rem; height: 0.85rem; }
+
     .loading-state, .empty-state { display: flex; justify-content: center; padding: 3rem; color: #64748b; }
   `],
 })
@@ -108,9 +114,17 @@ export class ScenariosComponent implements OnInit {
   private snackbar = inject(MatSnackBar);
 
   scenarios: Scenario[] = [];
+  domains: ProcessDomain[] = [];
   loading = true;
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.api.getProcessDomains().subscribe(d => this.domains = d);
+    this.load();
+  }
+
+  getDomain(s: Scenario): ProcessDomain | null {
+    return this.domains.find(d => d.id === s.processDomainId) ?? null;
+  }
 
   load() {
     this.loading = true;
