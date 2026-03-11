@@ -15,6 +15,7 @@ import { Scenario, EctParameters, ScientificValue } from '../../core/models/type
 import { ScientificPipe } from '../../shared/pipes/scientific.pipe';
 import { ParamDerivationComponent } from './param-derivation.component';
 import { DomainPickerComponent } from './domain-picker.component';
+import { ScenarioConfigurationsComponent } from './scenario-configurations.component';
 
 /** Mini-form for a single ScientificValue (coefficient + exponent) */
 function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValue) {
@@ -33,6 +34,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
     MatFormFieldModule, MatInputModule, MatSnackBarModule, MatProgressSpinnerModule,
     ParamDerivationComponent,
     DomainPickerComponent,
+    ScenarioConfigurationsComponent,
   ],
   template: `
     <div class="detail-page">
@@ -170,7 +172,14 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
               </div>
             </div>
           </mat-tab>
-
+          <!-- ── Configurations tab ── -->
+        <mat-tab label="Configurations">
+          <div class="tab-content">
+            <app-scenario-configurations
+              [scenarioId]="scenario.id"
+            />
+          </div>
+        </mat-tab>
         </mat-tab-group>
       }
 

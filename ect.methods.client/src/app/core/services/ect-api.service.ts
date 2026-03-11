@@ -25,6 +25,10 @@ import {
   CreateParameterDefinitionRequest,
   UpdateParameterDefinitionRequest,
   ApplyTemplateRequest,
+  ScenarioConfiguration,
+  CreateScenarioConfigurationRequest,
+  UpdateScenarioConfigurationRequest,
+  UpdateConfigurationEntryRequest,
 } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
@@ -247,6 +251,68 @@ export class EctApiService {
     return this.http.post<ParameterDefinition[]>(
       `${this.base}/Scenarios/${scenarioId}/parameter-definitions/apply-template`,
       payload
+    );
+  }
+  // ─── Phase 5: Scenario Configurations ──────────────────────────────────
+
+  getConfigurations(scenarioId: number): Observable<ScenarioConfiguration[]> {
+    return this.http.get<ScenarioConfiguration[]>(
+      `${this.base}/Scenarios/${scenarioId}/configurations`
+    );
+  }
+
+  getConfiguration(scenarioId: number, configId: number): Observable<ScenarioConfiguration> {
+    return this.http.get<ScenarioConfiguration>(
+      `${this.base}/Scenarios/${scenarioId}/configurations/${configId}`
+    );
+  }
+
+  createConfiguration(
+    scenarioId: number,
+    payload: CreateScenarioConfigurationRequest
+  ): Observable<ScenarioConfiguration> {
+    return this.http.post<ScenarioConfiguration>(
+      `${this.base}/Scenarios/${scenarioId}/configurations`,
+      payload
+    );
+  }
+
+  updateConfiguration(
+    scenarioId: number,
+    configId: number,
+    payload: UpdateScenarioConfigurationRequest
+  ): Observable<ScenarioConfiguration> {
+    return this.http.put<ScenarioConfiguration>(
+      `${this.base}/Scenarios/${scenarioId}/configurations/${configId}`,
+      payload
+    );
+  }
+
+  updateConfigurationEntry(
+    scenarioId: number,
+    configId: number,
+    paramKey: string,
+    payload: UpdateConfigurationEntryRequest
+  ): Observable<ScenarioConfiguration> {
+    return this.http.put<ScenarioConfiguration>(
+      `${this.base}/Scenarios/${scenarioId}/configurations/${configId}/entries/${paramKey}`,
+      payload
+    );
+  }
+
+  activateConfiguration(
+    scenarioId: number,
+    configId: number
+  ): Observable<ScenarioConfiguration> {
+    return this.http.post<ScenarioConfiguration>(
+      `${this.base}/Scenarios/${scenarioId}/configurations/${configId}/activate`,
+      {}
+    );
+  }
+
+  deleteConfiguration(scenarioId: number, configId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/Scenarios/${scenarioId}/configurations/${configId}`
     );
   }
 }

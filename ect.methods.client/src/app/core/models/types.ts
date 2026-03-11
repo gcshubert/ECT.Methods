@@ -240,3 +240,39 @@ export interface UpdateParameterDefinitionRequest {
 export interface ApplyTemplateRequest {
   templateId: number;
 }
+// ─── Phase 5: Scenario Configurations ───────────────────────────────────────
+
+export interface ScenarioConfigurationEntry {
+  id: number;
+  parameterKey: string;
+  variantId: number | null;
+  variantLabel: string;
+  snapshotValue: ScientificValue | null;
+}
+
+export interface ScenarioConfiguration {
+  id: number;
+  scenarioId: number;
+  name: string;
+  description: string;
+  sortOrder: number;
+  createdDate: string;
+  entries: ScenarioConfigurationEntry[];
+  deficitAnalysis: DeficitAnalysis | null;
+}
+
+export interface CreateScenarioConfigurationRequest {
+  name: string;
+  description: string;
+  cloneFromConfigurationId?: number | null;
+}
+
+export interface UpdateScenarioConfigurationRequest {
+  name: string;
+  description: string;
+  sortOrder: number;
+}
+
+export interface UpdateConfigurationEntryRequest {
+  variantId: number | null;
+}
