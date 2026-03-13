@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, input } from '@angular/core';
+import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -8,10 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { Scenario, EctParameters, ScientificValue } from '../../core/models/types';
+import { Scenario, ScientificValue, ParameterDefinition } from '../../core/models/types';
 import { ScientificPipe } from '../../shared/pipes/scientific.pipe';
 import { ParamDerivationComponent } from './param-derivation.component';
 import { DomainPickerComponent } from './domain-picker.component';
@@ -31,7 +30,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
   imports: [
     CommonModule, RouterLink, ReactiveFormsModule, ScientificPipe,
     MatTabsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatSnackBarModule, MatProgressSpinnerModule,
+    MatFormFieldModule, MatInputModule, MatProgressSpinnerModule,
     ParamDerivationComponent,
     DomainPickerComponent,
     ScenarioConfigurationsComponent,
@@ -102,14 +101,14 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
           <mat-tab label="Parameters">
             <div class="tab-content">
               <p class="tab-hint">
-                Enter each ECT parameter as a coefficient × 10^exponent pair.
-                These values feed directly into the ACC deficit calculation.
+                Showing computed rollup values for the current active variants.
+                To change values, edit the derivation chain in the Derivation tab.
               </p>
 
               @if (paramForm) {
-                <form [formGroup]="paramForm" (ngSubmit)="saveParams()">
+                <form [formGroup]="paramForm">
                   <div class="params-grid">
-                    @for (param of paramDefs; track param.key) {
+                    @for (param of paramDefs(); track param.key) {
                       <mat-card class="param-card">
                         <mat-card-header>
                           <mat-card-title class="param-title">
@@ -122,12 +121,12 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                           <div class="sv-fields">
                             <mat-form-field appearance="outline" class="coeff-field">
                               <mat-label>Coefficient</mat-label>
-                              <input matInput type="number" formControlName="coefficient" />
+                              <input matInput type="number" formControlName="coefficient" readonly />
                             </mat-form-field>
                             <span class="times-sign">× 10^</span>
                             <mat-form-field appearance="outline" class="exp-field">
                               <mat-label>Exponent</mat-label>
-                              <input matInput type="number" formControlName="exponent" />
+                              <input matInput type="number" formControlName="exponent" readonly />
                             </mat-form-field>
                           </div>
                           <div class="param-preview">
@@ -136,13 +135,6 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                         </mat-card-content>
                       </mat-card>
                     }
-                  </div>
-
-                  <div class="form-actions">
-                    <button mat-flat-button color="primary" type="submit"
-                            [disabled]="paramForm.invalid || saving">
-                      {{ saving ? 'Saving…' : 'Save Parameters' }}
-                    </button>
                   </div>
                 </form>
               }
@@ -158,7 +150,7 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
               </p>
 
               <div class="derivation-grid">
-                @for (param of paramDefs; track param.key) {
+                @for (param of paramDefs(); track param.key) {
                   <mat-card class="deriv-card">
                     <mat-card-content>
                       <app-param-derivation
@@ -237,40 +229,38 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
 export class ScenarioDetailComponent implements OnInit {
   id = input.required<string>();
 
-  private api      = inject(EctApiService);
-  private fb       = inject(FormBuilder);
-  private snackbar = inject(MatSnackBar);
+  private api = inject(EctApiService);
+  private fb  = inject(FormBuilder);
 
   scenario: Scenario | null = null;
   loading = true;
-  saving  = false;
   paramForm: ReturnType<FormBuilder['group']> | null = null;
-
-  readonly paramDefs = [
-    { key: 'energy', symbol: 'E', label: 'Energy',     description: 'Usable energy available to the process' },
-    { key: 'control', symbol: 'C', label: 'Control',    description: 'Available control capacity' },
-    { key: 'complexity', symbol: 'k', label: 'Complexity', description: 'Complexity constant for the target outcome' },
-    { key: 'timeAvailable', symbol: 'T', label: 'Time',       description: 'Time available for the process' },
-  ];
+  paramDefs = signal<ParameterDefinition[]>([]);
 
   ngOnInit() {
+    this.api.getParameterDefinitions(+this.id()).subscribe({
+      next: (defs) => {
+        const sorted = defs.slice().sort((a, b) => a.sortOrder - b.sortOrder);
+        this.paramDefs.set(sorted);
+        this.buildForm(sorted);
+      },
+    });
     this.api.getScenario(+this.id()).subscribe({
       next: (s) => {
         this.scenario = s;
-        if (s.parameters) this.buildForm(s.parameters);
         this.loading = false;
       },
       error: () => { this.loading = false; },
     });
   }
 
-  buildForm(p: EctParameters) {
-    this.paramForm = this.fb.group({
-      energy: svGroup(this.fb, p.energy),
-      control: svGroup(this.fb, p.control),
-      complexity: svGroup(this.fb, p.complexity),
-      timeAvailable: svGroup(this.fb, p.timeAvailable),
-    });
+  buildForm(defs: ParameterDefinition[]) {
+    const group: Record<string, ReturnType<typeof svGroup>> = {};
+    for (const def of defs) {
+      const val = def.defaultValue ?? { coefficient: 0, exponent: 0 };
+      group[def.key] = svGroup(this.fb, val);
+    }
+    this.paramForm = this.fb.group(group);
   }
 
   getParamValue(key: string): ScientificValue {
@@ -279,26 +269,17 @@ export class ScenarioDetailComponent implements OnInit {
   }
 
   onDomainApplied(event: { domainId: number; templateApplied: boolean }) {
-    // Refresh scenario to pick up updated processDomainId
     this.api.getScenario(+this.id()).subscribe({
-      next: (s) => {
-        this.scenario = s;
-        if (event.templateApplied && s.parameters) {
-          this.buildForm(s.parameters);
-        }
-      },
+      next: (s) => { this.scenario = s; },
     });
-  }
-
-  saveParams() {
-    if (!this.paramForm || this.paramForm.invalid) return;
-    this.saving = true;
-    this.api.updateParameters(+this.id(), this.paramForm.value as EctParameters).subscribe({
-      next: () => {
-        this.snackbar.open('Parameters saved', 'Dismiss', { duration: 3000 });
-        this.saving = false;
-      },
-      error: () => { this.saving = false; },
-    });
+    if (event.templateApplied) {
+      this.api.getParameterDefinitions(+this.id()).subscribe({
+        next: (defs) => {
+          const sorted = defs.slice().sort((a, b) => a.sortOrder - b.sortOrder);
+          this.paramDefs.set(sorted);
+          this.buildForm(sorted);
+        },
+      });
+    }
   }
 }
