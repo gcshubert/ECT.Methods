@@ -161,10 +161,11 @@ export class EctApiService {
     scenarioId: number,
     paramKey: string,
     variantId: number,
+    stepId: number,
     payload: UpsertVariantSubParameterRequest
   ): Observable<VariantSubParameter> {
     return this.http.put<VariantSubParameter>(
-      `${this.docBase(scenarioId, paramKey)}/variants/${variantId}/sub-parameters`,
+      `${this.docBase(scenarioId, paramKey)}/variants/${variantId}/sub-parameters/${stepId}`,
       payload
     );
   }

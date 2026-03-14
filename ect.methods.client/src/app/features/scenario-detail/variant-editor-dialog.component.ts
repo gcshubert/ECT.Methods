@@ -37,6 +37,7 @@ export interface VariantEditorDialogData {
 
 // ── Editable variant sub-parameter row ───────────────────────────────────────
 interface VariantStepRow {
+  id: number;
   stepOrder: number;
   name: string;
   coefficient: number;
@@ -681,7 +682,7 @@ export class VariantEditorDialogComponent implements OnInit {
       operation:       row.operation,
     };
     this.api.upsertVariantSubParameter(
-      this.data.scenarioId, this.data.paramKey, variant.id, payload
+      this.data.scenarioId, this.data.paramKey, variant.id, row.id, payload
     ).subscribe({
       next: () => {
         this.dirtyRows.update(s => { s.delete(row.stepOrder); return new Set(s); });
@@ -713,6 +714,7 @@ export class VariantEditorDialogComponent implements OnInit {
 
   private toRow(s: VariantSubParameter): VariantStepRow {
     return {
+      id:              s.id,
       stepOrder:       s.stepOrder,
       name:            s.name,
       coefficient:     s.value.coefficient,

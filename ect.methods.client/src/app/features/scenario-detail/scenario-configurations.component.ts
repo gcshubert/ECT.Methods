@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // FILE: src/app/features/scenario-detail/scenario-configurations.component.ts
-// Phase 5d — Per-entry variant override (click cell to swap variant)
+// Phase 5e — Sort/reorder configurations (hover index badge to reveal ▲/▼)
 // ═══════════════════════════════════════════════════════════════════════════
 
 import {
@@ -220,7 +220,21 @@ interface SavingEntry {
                 } @else {
                   <!-- ── Normal header ── -->
                   <div class="card-title-row">
-                    <span class="config-index">{{ config.sortOrder + 1 }}</span>
+                    <div class="config-index-wrap">
+                      <button class="reorder-btn reorder-btn--up"
+                              matTooltip="Move up"
+                              [disabled]="config.sortOrder === 0 || activatingId() !== null || reordering()"
+                              (click)="moveConfig(config, 'up'); $event.stopPropagation()">
+                        <mat-icon>arrow_drop_up</mat-icon>
+                      </button>
+                      <span class="config-index">{{ config.sortOrder + 1 }}</span>
+                      <button class="reorder-btn reorder-btn--down"
+                              matTooltip="Move down"
+                              [disabled]="config.sortOrder === configs().length - 1 || activatingId() !== null || reordering()"
+                              (click)="moveConfig(config, 'down'); $event.stopPropagation()">
+                        <mat-icon>arrow_drop_down</mat-icon>
+                      </button>
+                    </div>
                     <div class="card-title-block">
                       <span class="config-name">{{ config.name }}</span>
                       @if (config.description) {
@@ -535,6 +549,57 @@ interface SavingEntry {
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
+    /* ── Reorder badge (Phase 5e) ── */
+    .config-index-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .reorder-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 12px;
+      padding: 0;
+      margin: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.12s;
+      color: #475569;
+      overflow: hidden;
+    }
+    .reorder-btn mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      line-height: 1.25rem;
+      display: block;
+    }
+    .reorder-btn:not([disabled]):hover {
+      color: #38bdf8;
+    }
+    .reorder-btn[disabled] {
+      cursor: default;
+      opacity: 0 !important;
+    }
+    .card-title-row:hover .reorder-btn:not([disabled]) {
+      opacity: 1;
+    }
+    .reorder-btn:not([disabled]):hover {
+      color: #38bdf8 !important;
+    }
+    .reorder-btn[disabled] {
+      color: #1e293b !important;
+      opacity: 0 !important;
+    }
+    .card-title-row:hover .reorder-btn:not([disabled]) {
+      opacity: 1;
+    }
+
     .card-title-block { display: flex; flex-direction: column; gap: 0.15rem; }
     .config-name { color: #e2e8f0; font-weight: 600; font-size: 0.95rem; }
     .config-desc { color: #64748b; font-size: 0.78rem; }
@@ -795,6 +860,10 @@ export class ScenarioConfigurationsComponent implements OnInit, OnChanges {
   cloningId    = signal<number | null>(null);
   cloning      = signal(false);
 
+  // ── Phase 5e: reorder state ──────────────────────────────────────────────
+  /** True while any sortOrder swap PUT is in flight. */
+  reordering = signal(false);
+
   // ── Phase 5d: variant picker state ──────────────────────────────────────
   /** Which cell's picker is currently open, or null. */
   pickerTarget  = signal<PickerTarget | null>(null);
@@ -915,6 +984,53 @@ export class ScenarioConfigurationsComponent implements OnInit, OnChanges {
       error: () => {
         this.renaming.set(false);
         this.snackbar.open('Failed to update configuration', 'Dismiss', { duration: 3000 });
+      },
+    });
+  }
+
+  // ── Phase 5e: Reorder ────────────────────────────────────────────────────
+
+  moveConfig(config: ScenarioConfiguration, direction: 'up' | 'down') {
+    const list = this.configs();
+    const idx  = list.findIndex(c => c.id === config.id);
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= list.length) return;
+
+    const other = list[swapIdx];
+    const thisOrder  = config.sortOrder;
+    const otherOrder = other.sortOrder;
+
+    this.reordering.set(true);
+
+    const putThis: UpdateScenarioConfigurationRequest = {
+      name: config.name, description: config.description ?? '', sortOrder: otherOrder,
+    };
+    const putOther: UpdateScenarioConfigurationRequest = {
+      name: other.name, description: other.description ?? '', sortOrder: thisOrder,
+    };
+
+    this.api.updateConfiguration(this.scenarioId(), config.id, putThis).subscribe({
+      next: (updatedThis) => {
+        this.api.updateConfiguration(this.scenarioId(), other.id, putOther).subscribe({
+          next: (updatedOther) => {
+            this.configs.update(cs =>
+              cs.map(c => {
+                if (c.id === updatedThis.id)  return updatedThis;
+                if (c.id === updatedOther.id) return updatedOther;
+                return c;
+              }).slice().sort((a, b) => a.sortOrder - b.sortOrder)
+            );
+            this.reordering.set(false);
+          },
+          error: () => {
+            this.reordering.set(false);
+            this.snackbar.open('Failed to reorder configurations', 'Dismiss', { duration: 3000 });
+          },
+        });
+      },
+      error: () => {
+        this.reordering.set(false);
+        this.snackbar.open('Failed to reorder configurations', 'Dismiss', { duration: 3000 });
       },
     });
   }
