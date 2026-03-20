@@ -29,6 +29,15 @@ import {
   CreateScenarioConfigurationRequest,
   UpdateScenarioConfigurationRequest,
   UpdateConfigurationEntryRequest,
+  // Graph Management
+  ParameterNode,
+  CreateParameterNodeRequest,
+  UpdateParameterNodeRequest,
+  Edge,
+  CreateEdgeRequest,
+  UpdateEdgeRequest,
+  HierarchicalStepDto,
+  CreateHierarchicalStepWithParametersDto
 } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
@@ -315,5 +324,47 @@ export class EctApiService {
     return this.http.delete<void>(
       `${this.base}/Scenarios/${scenarioId}/configurations/${configId}`
     );
+  }
+
+  // ─── Graph Management (Hierarchical Scenarios) ──────────────────────────────
+
+  createParameterNode(scenarioId: number, payload: CreateParameterNodeRequest): Observable<ParameterNode> {
+    return this.http.post<ParameterNode>(`${this.base}/Graph/scenario/${scenarioId}/nodes`, payload);
+  }
+
+  createHierarchicalStep(scenarioId: number, payload: CreateHierarchicalStepWithParametersDto): Observable<any> {
+    return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`, payload);
+  }
+  getParameterNodes(scenarioId: number): Observable<ParameterNode[]> {
+    return this.http.get<ParameterNode[]>(`${this.base}/Graph/scenario/${scenarioId}/nodes`);
+  }
+
+  updateParameterNode(scenarioId: number, nodeId: string, payload: UpdateParameterNodeRequest): Observable<ParameterNode> {
+    return this.http.put<ParameterNode>(`${this.base}/Graph/scenario/${scenarioId}/nodes/${nodeId}`, payload);
+  }
+
+  deleteParameterNode(scenarioId: number, nodeId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/Graph/scenario/${scenarioId}/nodes/${nodeId}`);
+  }
+
+  createEdge(scenarioId: number, payload: CreateEdgeRequest): Observable<Edge> {
+    return this.http.post<Edge>(`${this.base}/Graph/scenario/${scenarioId}/edges`, payload);
+  }
+
+  getEdges(scenarioId: number): Observable<Edge[]> {
+    return this.http.get<Edge[]>(`${this.base}/Graph/scenario/${scenarioId}/edges`);
+  }
+
+  updateEdge(scenarioId: number, edgeId: string, payload: UpdateEdgeRequest): Observable<Edge> {
+    return this.http.put<Edge>(`${this.base}/Graph/scenario/${scenarioId}/edges/${edgeId}`, payload);
+  }
+
+  deleteEdge(scenarioId: number, edgeId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/Graph/scenario/${scenarioId}/edges/${edgeId}`);
+  }
+  getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStepDto[]> {
+    // Use 'this.base' to match the other methods
+    // Ensure the route matches your HierarchicalController [Route] attribute
+    return this.http.get<HierarchicalStepDto[]>(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`);
   }
 }

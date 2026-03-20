@@ -136,8 +136,10 @@ import {
                   <mat-spinner diameter="16" style="display:inline-block;margin-right:6px" />
                   Applying…
                 } @else {
-                  <mat-icon>check</mat-icon>
-                  Apply Template
+                  <ng-container>
+                    <mat-icon>check</mat-icon>
+                    Apply Template
+                  </ng-container>
                 }
               </button>
               <button mat-stroked-button

@@ -11,9 +11,10 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "localhost (Chrome)",
+      "name": "Debug ECT UI",
       "url": "https://localhost:62206",
-      "webRoot": "${workspaceFolder}"
-    }
-  ]
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile", // Isolates the session
+      "runtimeArgs": [ "--remote-debugging-port=9222" ]
+    }  ]
 }

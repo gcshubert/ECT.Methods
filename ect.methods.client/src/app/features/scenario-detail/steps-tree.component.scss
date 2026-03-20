@@ -1,0 +1,100 @@
+/* Role Badge Colors */
+:host {
+  --role-e: #e91e63; /* Energy - Pink/Red */
+  --role-t: #2196f3; /* Throughput - Blue */
+  --role-c: #4caf50; /* Control - Green */
+  --role-k: #ff9800; /* Complexity - Orange */
+  --tree-line: #d1d1d1;
+}
+
+.mat-tree {
+  background: transparent;
+}
+
+.mat-tree-node, .mat-nested-tree-node {
+  color: #333;
+  font-family: 'Roboto Mono', monospace; /* Technical feel */
+}
+
+/* The horizontal alignment of node content */
+.node-content-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
+
+/* The Role Badge (E, T, C, k) */
+.role-badge {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  color: white;
+  margin-right: 12px;
+  text-transform: uppercase;
+
+  &[data-role="E"] {
+    background-color: var(--role-e);
+  }
+
+  &[data-role="T"] {
+    background-color: var(--role-t);
+  }
+
+  &[data-role="C"] {
+    background-color: var(--role-c);
+  }
+
+  &[data-role="k"] {
+    background-color: var(--role-k);
+  }
+}
+
+/* Node Text Details */
+.node-label {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.node-key {
+  color: #757575;
+  font-size: 0.8rem;
+  margin-right: auto; /* Pushes the next items to the right */
+}
+
+.node-value-chip {
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  color: #444;
+  border: 1px solid #ddd;
+}
+
+/* Nesting lines (Optional: adds visual connection) */
+.mat-nested-tree-node div[role="group"] {
+  border-left: 1px dashed var(--tree-line);
+  margin-left: 24px; /* Matches the toggle button width */
+  padding-left: 8px;
+}
+
+/* Action buttons hidden until hover */
+.node-actions {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.node-content-wrapper:hover .node-actions {
+  opacity: 1;
+}
