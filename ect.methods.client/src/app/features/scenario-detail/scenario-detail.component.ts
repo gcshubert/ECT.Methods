@@ -115,7 +115,6 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                 @if (isHierarchical) {
                         <p class="tab-hint">Define the process hierarchy and rollup topology.</p>
                         <app-steps-tree [scenarioId]="id()"></app-steps-tree>
-                        <button mat-button (click)="openAddStepDialog()">+ Add Step</button>
                       } @else {
                         <p class="tab-hint">Showing computed rollup values for active variants.</p>
                         @if (paramForm) {

@@ -1,11 +1,31 @@
+<div style="margin-bottom: 8px;">
+  <button mat-raised-button color="primary" (click)="addStep()">
+    <mat-icon>add</mat-icon> Add Step
+  </button>
+</div>
+
 <mat-tree #tree="matTree" [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
 
-  <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
-    <button mat-icon-button matTreeNodeToggle>
-      <mat-icon>{{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
-    </button>
-    {{node.name}}
+  <!-- Leaf node template (no children) -->
+  <mat-tree-node *matTreeNodeDef="let node">
+    <span style="padding-left: 16px;">
+      <span class="role-badge role-{{node.role}}">{{node.role}}</span>
+      {{node.label}}
+      <span *ngIf="node.baseValue != null" style="margin-left: 8px; color: grey;">
+        = {{node.baseValue}}
+      </span>
+    </span>
+  </mat-tree-node>
 
+  <!-- Branch node template (has children) -->
+  <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+    <div style="display: flex; align-items: center;">
+      <button mat-icon-button matTreeNodeToggle>
+        <mat-icon>{{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
+      </button>
+      <span class="role-badge role-{{node.role}}">{{node.role}}</span>
+      <span>{{node.label}}</span>
+    </div>
     <div [hidden]="!tree.isExpanded(node)" role="group">
       <ng-container matTreeNodeOutlet></ng-container>
     </div>

@@ -48,5 +48,47 @@ html, body {
   padding: 0 !important;
 }
 
+/* Dark mode button overrides */
+.mat-mdc-raised-button:not([color]) {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+.mat-mdc-raised-button[color="primary"] {
+  background-color: #0ea5e9 !important;
+  color: #ffffff !important;
+}
+
+.mat-mdc-button:not([color]) {
+  color: #94a3b8 !important;
+}
+
 /* Monospace utility */
 .mono { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
+
+/* ── Add Step Dialog ─────────────────────────────────────────────────────── */
+.param-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.param-row {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.param-coeff-field {
+  flex: 3;
+  max-width: 80px;
+}
+
+.param-exp-field {
+  flex: 2;
+  max-width: 160px;
+}
+
+.full-width {
+  width: 100%;
+}

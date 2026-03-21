@@ -9,7 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { EctApiService } from '../../core/services/ect-api.service';
 import {
   CreateHierarchicalStepDto,
-  CreateHierarchicalStepWithParametersDto
+  CreateHierarchicalStepWithParametersDto,
+  ScientificValue
 } from '../../core/models/types';
 
 @Component({
@@ -58,55 +59,64 @@ export class AddStepDialogComponent {
   }
 
   onSave(): void {
+    // Track 4 TODO: BaseValue should carry full ScientificValue (coefficient + exponent)
+    // once UsesEdge schema is revised to Dictionary<string, ScientificValueDto>.
+
     if (this.stepForm.valid) {
       const formValue = this.stepForm.getRawValue();
 
-      // 1. Map the nested scientific groups into the 4 Parameter DTOs
-      // This structure ensures Neo4j can "Walk" and find E, T, C, and k
+      const toDouble = (coeff: number | null, exp: number | null): number =>
+        (coeff ?? 1) * Math.pow(10, exp ?? 0);
+
+      //console.log('Form raw value:', JSON.stringify(formValue));
+
       const parameters: CreateHierarchicalStepDto[] = [
         {
-          role: 'E', key: 'Energy', name: 'Energy', label: 'E', type: 'Scientific',
-          description: 'Energy coefficient for this step', // <--- Add this
-          baseValue: formValue.energy.coefficient ?? 0,
-          exponent: formValue.energy.exponent ?? 0,
-          weight: 1
+          role: 'E', key: 'energy', name: formValue.name ?? '',
+          label: 'E', type: 'E',
+          description: 'Energy for this step',
+          baseValue: toDouble(formValue.energy.coefficient, formValue.energy.exponent),
+          weight: 1,
+          rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
         {
-          role: 'T', key: 'Time', name: 'Time Available', label: 'T', type: 'Scientific',
-          description: 'Time available for this step', // <--- Add this
-          baseValue: formValue.timeAvailable.coefficient ?? 0,
-          exponent: formValue.timeAvailable.exponent ?? 0,
-          weight: 1
+          role: 'T', key: 'time', name: formValue.name ?? '',
+          label: 'T', type: 'T',
+          description: 'Time available for this step',
+          baseValue: toDouble(formValue.timeAvailable.coefficient, formValue.timeAvailable.exponent),
+          weight: 1,
+          rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
         {
-          role: 'C', key: 'Complexity', name: 'Complexity', label: 'C', type: 'Scientific',
-          description: 'Complexity constant for this step', // <--- Add this
-          baseValue: formValue.complexity.coefficient ?? 0,
-          exponent: formValue.complexity.exponent ?? 0,
-          weight: 1
+          role: 'C', key: 'control', name: formValue.name ?? '',
+          label: 'C', type: 'C',
+          description: 'Control capacity for this step',
+          baseValue: toDouble(formValue.control.coefficient, formValue.control.exponent),
+          weight: 1,
+          rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
         {
-          role: 'k', key: 'Control', name: 'Control Constant', label: 'k', type: 'Scientific',
-          description: 'Control constant for this step', // <--- Add this
-          baseValue: formValue.control.coefficient ?? 0,
-          exponent: formValue.control.exponent ?? 0,
-          weight: 1
+          role: 'k', key: 'complexity', name: formValue.name ?? '',
+          label: 'k', type: 'k',
+          description: 'Complexity for this step',
+          baseValue: toDouble(formValue.complexity.coefficient, formValue.complexity.exponent),
+          weight: 1,
+          rollupOperator: formValue.rollupOperator ?? 'Sum'
         }
       ];
-      // 2. Bundle the Step Anchor with its 4 coefficients
+
       const payload: CreateHierarchicalStepWithParametersDto = {
-        stepName: formValue.name ?? 'New Step', // Fallback ensures it's always a string
+        stepName: formValue.name ?? 'New Step',
         description: `Step for ${formValue.name}`,
-        sortOrder: 0, // You can add a sortOrder field to your form later
+        sortOrder: 0,
         parentNodeId: this.data.parentId,
-        parameters: parameters
+        parameters
       };
 
-      // 3. POST to the ECT.ACC.Api (Port 5041)
       this.api.createHierarchicalStep(+this.data.scenarioId, payload).subscribe({
         next: () => {
           console.log('Hierarchy saved: Step + 4 Parameters created in Neo4j.');
-          this.dialogRef.close(true); // Return true to trigger a refresh in the parent
+          this.dialogRef.close(true);
         },
         error: (err) => console.error('Graph Save Failed:', err)
       });

@@ -36,7 +36,7 @@ import {
   Edge,
   CreateEdgeRequest,
   UpdateEdgeRequest,
-  HierarchicalStepDto,
+  HierarchicalStep,
   CreateHierarchicalStepWithParametersDto
 } from '../models/types';
 
@@ -333,10 +333,10 @@ export class EctApiService {
   }
 
   createHierarchicalStep(scenarioId: number, payload: CreateHierarchicalStepWithParametersDto): Observable<any> {
-    return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`, payload);
+    return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/hierarchical-steps`, payload);
   }
   getParameterNodes(scenarioId: number): Observable<ParameterNode[]> {
-    return this.http.get<ParameterNode[]>(`${this.base}/Graph/scenario/${scenarioId}/nodes`);
+    return this.http.get<ParameterNode[]>(`${this.base}/Graph/hierarchical-scenario/${scenarioId}/nodes`);
   }
 
   updateParameterNode(scenarioId: number, nodeId: string, payload: UpdateParameterNodeRequest): Observable<ParameterNode> {
@@ -362,9 +362,9 @@ export class EctApiService {
   deleteEdge(scenarioId: number, edgeId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/Graph/scenario/${scenarioId}/edges/${edgeId}`);
   }
-  getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStepDto[]> {
+  getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStep[]> {
     // Use 'this.base' to match the other methods
     // Ensure the route matches your HierarchicalController [Route] attribute
-    return this.http.get<HierarchicalStepDto[]>(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`);
+    return this.http.get<HierarchicalStep[]>(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`);
   }
 }

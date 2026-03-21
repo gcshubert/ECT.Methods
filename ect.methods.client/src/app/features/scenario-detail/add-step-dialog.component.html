@@ -29,47 +29,46 @@
       </mat-form-field>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-
-      <div formGroupName="energy" style="display: flex; gap: 5px;">
-        <mat-form-field appearance="outline" style="flex: 2;">
-          <mat-label>Energy (E) Coeff</mat-label>
+    <div class="param-grid">
+      <div formGroupName="energy" class="param-row">
+        <mat-form-field appearance="outline" class="param-coeff-field">
+          <mat-label>E Coeff</mat-label>
           <input matInput type="number" formControlName="coefficient">
         </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-form-field appearance="outline" class="param-exp-field">
           <mat-label>Exp</mat-label>
           <input matInput type="number" formControlName="exponent">
         </mat-form-field>
       </div>
 
-      <div formGroupName="control" style="display: flex; gap: 5px;">
-        <mat-form-field appearance="outline" style="flex: 2;">
-          <mat-label>Control (k) Coeff</mat-label>
+      <div formGroupName="control" class="param-row">
+        <mat-form-field appearance="outline" class="param-coeff-field">
+          <mat-label>C Coeff</mat-label>
           <input matInput type="number" formControlName="coefficient">
         </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-form-field appearance="outline" class="param-exp-field">
           <mat-label>Exp</mat-label>
           <input matInput type="number" formControlName="exponent">
         </mat-form-field>
       </div>
 
-      <div formGroupName="complexity" style="display: flex; gap: 5px;">
-        <mat-form-field appearance="outline" style="flex: 2;">
-          <mat-label>Complexity (C) Coeff</mat-label>
+      <div formGroupName="complexity" class="param-row">
+        <mat-form-field appearance="outline" class="param-coeff-field">
+          <mat-label>k Coeff</mat-label>
           <input matInput type="number" formControlName="coefficient">
         </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-form-field appearance="outline" class="param-exp-field">
           <mat-label>Exp</mat-label>
           <input matInput type="number" formControlName="exponent">
         </mat-form-field>
       </div>
 
-      <div formGroupName="timeAvailable" style="display: flex; gap: 5px;">
-        <mat-form-field appearance="outline" style="flex: 2;">
-          <mat-label>Time (T) Coeff</mat-label>
+      <div formGroupName="timeAvailable" class="param-row">
+        <mat-form-field appearance="outline" class="param-coeff-field">
+          <mat-label>T Coeff</mat-label>
           <input matInput type="number" formControlName="coefficient">
         </mat-form-field>
-        <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-form-field appearance="outline" class="param-exp-field">
           <mat-label>Exp</mat-label>
           <input matInput type="number" formControlName="exponent">
         </mat-form-field>

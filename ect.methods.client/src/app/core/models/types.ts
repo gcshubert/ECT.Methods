@@ -389,8 +389,7 @@ export interface CreateHierarchicalStepDto {
   rollupOperator?: string;
   weight: number;
   parentNodeId?: string;
-  baseValue?: number;
-  exponent?: number | null; 
+  baseValue?: number | null; 
 }
 
 export interface CreateHierarchicalStepWithParametersDto {
@@ -401,7 +400,14 @@ export interface CreateHierarchicalStepWithParametersDto {
   parameters: CreateHierarchicalStepDto[]; // The 4 core coefficients
 }
 
-export interface HierarchicalStepDto extends CreateHierarchicalStepWithParametersDto {
-  id: number;
-  createdDate: Date;
+export interface HierarchicalStepDto {
+  nodeId: string;
+  key: string;
+  label: string;
+  description: string;
+  role: string;
+  parentNodeId?: string | null;
+  rollupOperator?: string | null;
+  weight: number;
+  baseValue?: number | null;
 }
