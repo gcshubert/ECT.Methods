@@ -44,19 +44,19 @@
   margin-right: 12px;
   text-transform: uppercase;
 
-  &[data-role="E"] {
+  &.role-E {
     background-color: var(--role-e);
   }
 
-  &[data-role="T"] {
+  &.role-T {
     background-color: var(--role-t);
   }
 
-  &[data-role="C"] {
+  &.role-C {
     background-color: var(--role-c);
   }
 
-  &[data-role="k"] {
+  &.role-k {
     background-color: var(--role-k);
   }
 }
@@ -95,6 +95,6 @@
   transition: opacity 0.2s;
 }
 
-.node-content-wrapper:hover .node-actions {
+.tree-node-row:hover .node-actions {
   opacity: 1;
 }

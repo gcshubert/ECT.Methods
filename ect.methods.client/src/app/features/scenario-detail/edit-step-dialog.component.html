@@ -1,0 +1,88 @@
+<h2 mat-dialog-title>Edit Step</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="stepForm">
+
+    <!-- Step Name -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Step Name</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <!-- Rollup Operator -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Rollup Operator</mat-label>
+      <mat-select formControlName="rollupOperator">
+        <mat-option *ngFor="let op of operators" [value]="op">{{ op }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="section-label">Parameter Values</div>
+
+    <!-- Energy -->
+    <div class="param-row" formGroupName="energy">
+      <span class="role-badge role-E">E</span>
+      <mat-form-field appearance="outline" class="sci-field">
+        <mat-label>Coefficient</mat-label>
+        <input matInput type="number" formControlName="coefficient" />
+      </mat-form-field>
+      <span class="times">×10</span>
+      <mat-form-field appearance="outline" class="exp-field">
+        <mat-label>Exp</mat-label>
+        <input matInput type="number" formControlName="exponent" />
+      </mat-form-field>
+    </div>
+
+    <!-- Time -->
+    <div class="param-row" formGroupName="timeAvailable">
+      <span class="role-badge role-T">T</span>
+      <mat-form-field appearance="outline" class="sci-field">
+        <mat-label>Coefficient</mat-label>
+        <input matInput type="number" formControlName="coefficient" />
+      </mat-form-field>
+      <span class="times">×10</span>
+      <mat-form-field appearance="outline" class="exp-field">
+        <mat-label>Exp</mat-label>
+        <input matInput type="number" formControlName="exponent" />
+      </mat-form-field>
+    </div>
+
+    <!-- Control -->
+    <div class="param-row" formGroupName="control">
+      <span class="role-badge role-C">C</span>
+      <mat-form-field appearance="outline" class="sci-field">
+        <mat-label>Coefficient</mat-label>
+        <input matInput type="number" formControlName="coefficient" />
+      </mat-form-field>
+      <span class="times">×10</span>
+      <mat-form-field appearance="outline" class="exp-field">
+        <mat-label>Exp</mat-label>
+        <input matInput type="number" formControlName="exponent" />
+      </mat-form-field>
+    </div>
+
+    <!-- Complexity -->
+    <div class="param-row" formGroupName="complexity">
+      <span class="role-badge role-k">k</span>
+      <mat-form-field appearance="outline" class="sci-field">
+        <mat-label>Coefficient</mat-label>
+        <input matInput type="number" formControlName="coefficient" />
+      </mat-form-field>
+      <span class="times">×10</span>
+      <mat-form-field appearance="outline" class="exp-field">
+        <mat-label>Exp</mat-label>
+        <input matInput type="number" formControlName="exponent" />
+      </mat-form-field>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close(false)">Cancel</button>
+  <button mat-flat-button color="primary"
+          [disabled]="stepForm.invalid"
+          (click)="onSave()">
+    Save
+  </button>
+</mat-dialog-actions>

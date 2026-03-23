@@ -37,7 +37,9 @@ import {
   CreateEdgeRequest,
   UpdateEdgeRequest,
   HierarchicalStep,
-  CreateHierarchicalStepWithParametersDto
+  HierarchicalStepDto,
+  CreateHierarchicalStepWithParametersDto,
+  UpdateHierarchicalStepDto
 } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
@@ -335,6 +337,20 @@ export class EctApiService {
   createHierarchicalStep(scenarioId: number, payload: CreateHierarchicalStepWithParametersDto): Observable<any> {
     return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/hierarchical-steps`, payload);
   }
+
+  updateHierarchicalStep(scenarioId: number, stepId: string, payload: UpdateHierarchicalStepDto): Observable<HierarchicalStepDto> {
+    return this.http.put<HierarchicalStepDto>(
+      `${this.base}/scenarios/${scenarioId}/hierarchy/steps/${stepId}`,
+      payload
+    );
+  }
+
+  deleteHierarchicalStep(scenarioId: number, stepId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/scenarios/${scenarioId}/hierarchy/steps/${stepId}`
+    );
+  }
+
   getParameterNodes(scenarioId: number): Observable<ParameterNode[]> {
     return this.http.get<ParameterNode[]>(`${this.base}/Graph/hierarchical-scenario/${scenarioId}/nodes`);
   }

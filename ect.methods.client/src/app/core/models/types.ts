@@ -407,7 +407,18 @@ export interface HierarchicalStepDto {
   description: string;
   role: string;
   parentNodeId?: string | null;
+  parentNodeIds?: string[];            // full DAG support
   rollupOperator?: string | null;
   weight: number;
   baseValue?: number | null;
+}
+export interface UpdateHierarchicalStepDto {
+  name?: string;
+  label?: string;
+  description?: string;
+  role?: string;
+  type?: string;
+  rollupOperator?: string;
+  weight?: number;
+  baseValue?: number;
 }

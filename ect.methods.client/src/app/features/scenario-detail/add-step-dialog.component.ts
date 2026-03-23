@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { EctApiService } from '../../core/services/ect-api.service';
+import { toDouble } from '../../core/utils/math.utils';
 import {
   CreateHierarchicalStepDto,
   CreateHierarchicalStepWithParametersDto,
@@ -65,8 +66,6 @@ export class AddStepDialogComponent {
     if (this.stepForm.valid) {
       const formValue = this.stepForm.getRawValue();
 
-      const toDouble = (coeff: number | null, exp: number | null): number =>
-        (coeff ?? 1) * Math.pow(10, exp ?? 0);
 
       //console.log('Form raw value:', JSON.stringify(formValue));
 

@@ -1,0 +1,143 @@
+import { Component, Inject, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { EctApiService } from '../../core/services/ect-api.service';
+import { UpdateHierarchicalStepDto } from '../../core/models/types';
+import { toDouble, fromDouble } from '../../core/utils/math.utils';
+import { from, concatMap } from 'rxjs';
+
+// StepNode is defined in steps-tree.component.ts — re-declare the minimal
+// shape needed here to avoid a circular import. Track 4 TODO: move StepNode
+// to types.ts so it can be shared across components.
+interface StepNode {
+  nodeId: string;
+  label: string;
+  role: string;
+  rollupOperator?: string | null;
+  weight?: number | null;
+  baseValue?: number | null;
+  children?: StepNode[];
+}
+
+export interface EditStepDialogData {
+  scenarioId: string;
+  stepNode: StepNode;   // the anchor node, children carry leaf values
+}
+
+@Component({
+  selector: 'app-edit-step-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule
+  ],
+  templateUrl: './edit-step-dialog.component.html'
+})
+export class EditStepDialogComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private api = inject(EctApiService);
+
+  operators = ['Sum', 'Product', 'WeightedSum', 'Max', 'Min'];
+
+  stepForm = this.fb.group({
+    name: ['', Validators.required],
+    rollupOperator: ['Sum', Validators.required],
+    energy: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    control: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    complexity: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    timeAvailable: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+  });
+
+  constructor(
+    public dialogRef: MatDialogRef<EditStepDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: EditStepDialogData
+  ) { }
+
+  ngOnInit(): void {
+    console.log('stepNode:', this.data.stepNode) // to watch what is passed in 
+    const node = this.data.stepNode;
+
+    // Pre-populate name and rollup operator from anchor node
+    this.stepForm.patchValue({
+      name: node.label,
+      rollupOperator: node.rollupOperator ?? 'Sum'
+    });
+
+    // Pre-populate E/C/k/T from leaf children by role
+    // Track 4 TODO: decompose baseValue back to coefficient/exponent
+    // once UsesEdge carries ScientificValueDto instead of plain double
+    for (const child of node.children ?? []) {
+
+      switch (child.role) {
+        case 'E': this.stepForm.patchValue({ energy: fromDouble(child.baseValue) }); break;
+        case 'T': this.stepForm.patchValue({ timeAvailable: fromDouble(child.baseValue) }); break;
+        case 'C': this.stepForm.patchValue({ control: fromDouble(child.baseValue) }); break;
+        case 'k': this.stepForm.patchValue({ complexity: fromDouble(child.baseValue) }); break;
+      }
+    }
+  }
+
+  onSave(): void {
+    if (!this.stepForm.valid) return;
+
+    const fv = this.stepForm.getRawValue();
+    const node = this.data.stepNode;
+    const scenarioId = +this.data.scenarioId;
+
+    // Build leaf updates — baseValue only, no rollupOperator
+    // Rollup operator belongs to the anchor node, not the leaves
+    const leafUpdates: { nodeId: string; dto: UpdateHierarchicalStepDto }[] = [];
+
+    for (const child of node.children ?? []) {
+      let baseValue: number | undefined;
+      switch (child.role) {
+        case 'E': baseValue = toDouble(fv.energy.coefficient, fv.energy.exponent); break;
+        case 'T': baseValue = toDouble(fv.timeAvailable.coefficient, fv.timeAvailable.exponent); break;
+        case 'C': baseValue = toDouble(fv.control.coefficient, fv.control.exponent); break;
+        case 'k': baseValue = toDouble(fv.complexity.coefficient, fv.complexity.exponent); break;
+      }
+      if (baseValue !== undefined) {
+        leafUpdates.push({
+          nodeId: child.nodeId,
+          dto: { baseValue }   // baseValue only — no rollupOperator on leaves
+        });
+      }
+    }
+
+    // Anchor update — name and rollup operator
+    const anchorDto: UpdateHierarchicalStepDto = {
+      label: fv.name ?? node.label,
+      name: fv.name ?? node.label,
+      rollupOperator: fv.rollupOperator ?? 'Sum'
+    };
+
+    // Fire anchor first, then leaves sequentially via concatMap
+    this.api.updateHierarchicalStep(scenarioId, node.nodeId, anchorDto).subscribe({
+      next: () => {
+        if (leafUpdates.length === 0) {
+          this.dialogRef.close(true);
+          return;
+        }
+
+        from(leafUpdates).pipe(
+          concatMap(leaf => this.api.updateHierarchicalStep(scenarioId, leaf.nodeId, leaf.dto))
+        ).subscribe({
+          next: () => { },
+          error: (err) => console.error('Failed to update leaf:', err),
+          complete: () => this.dialogRef.close(true)
+        });
+      },
+      error: (err) => console.error('Failed to update step anchor:', err)
+    });
+  }
+}
