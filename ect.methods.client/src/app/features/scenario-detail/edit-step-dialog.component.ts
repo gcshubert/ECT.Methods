@@ -1,6 +1,6 @@
 import { Component, Inject, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +10,7 @@ import { EctApiService } from '../../core/services/ect-api.service';
 import { UpdateHierarchicalStepDto } from '../../core/models/types';
 import { toDouble, fromDouble } from '../../core/utils/math.utils';
 import { from, concatMap } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 
 // StepNode is defined in steps-tree.component.ts — re-declare the minimal
 // shape needed here to avoid a circular import. Track 4 TODO: move StepNode
@@ -49,35 +50,30 @@ export class EditStepDialogComponent implements OnInit {
 
   operators = ['Sum', 'Product', 'WeightedSum', 'Max', 'Min'];
 
-  stepForm = this.fb.group({
-    name: ['', Validators.required],
-    rollupOperator: ['Sum', Validators.required],
-    energy: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-    control: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-    complexity: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-    timeAvailable: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-  });
+  stepForm: FormGroup;
 
   constructor(
     public dialogRef: MatDialogRef<EditStepDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditStepDialogData
-  ) { }
+    @Inject(MAT_DIALOG_DATA) public data: EditStepDialogData,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.stepForm = this.fb.group({
+      name: [this.data.stepNode.label, Validators.required],
+      rollupOperator: [this.data.stepNode.rollupOperator ?? 'Sum', Validators.required],
+      energy: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+      control: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+      complexity: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+      timeAvailable: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    });
+  }
 
   ngOnInit(): void {
-    console.log('stepNode:', this.data.stepNode) // to watch what is passed in 
     const node = this.data.stepNode;
-
-    // Pre-populate name and rollup operator from anchor node
-    this.stepForm.patchValue({
-      name: node.label,
-      rollupOperator: node.rollupOperator ?? 'Sum'
-    });
 
     // Pre-populate E/C/k/T from leaf children by role
     // Track 4 TODO: decompose baseValue back to coefficient/exponent
     // once UsesEdge carries ScientificValueDto instead of plain double
     for (const child of node.children ?? []) {
-
       switch (child.role) {
         case 'E': this.stepForm.patchValue({ energy: fromDouble(child.baseValue) }); break;
         case 'T': this.stepForm.patchValue({ timeAvailable: fromDouble(child.baseValue) }); break;

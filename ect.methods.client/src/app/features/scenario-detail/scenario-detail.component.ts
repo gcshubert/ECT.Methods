@@ -155,36 +155,38 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
           </mat-tab>
 
           <!-- ── Derivation tab ── -->
-          <mat-tab label="Derivation">
-            <div class="tab-content">
-              <p class="tab-hint">
-                Document the derivation chain for each ECT parameter.
-                Each step multiplies, divides, adds, or raises the running total.
-              </p>
+          @if (!isHierarchical) {
+            <mat-tab label="Derivation">
+              <div class="tab-content">
+                <p class="tab-hint">
+                  Document the derivation chain for each ECT parameter.
+                  Each step multiplies, divides, adds, or raises the running total.
+                </p>
 
-              <div class="derivation-grid">
-                @for (param of paramDefs(); track param.key) {
-                  <mat-card class="deriv-card">
-                    <mat-card-content>
-                      <app-param-derivation
-                        [scenarioId]="scenario.id"
-                        [paramKey]="param.key"
-                        [paramSymbol]="param.symbol"
-                      />
-                    </mat-card-content>
-                  </mat-card>
-                }
+                <div class="derivation-grid">
+                  @for (param of paramDefs(); track param.key) {
+                    <mat-card class="deriv-card">
+                      <mat-card-content>
+                        <app-param-derivation
+                          [scenarioId]="scenario.id"
+                          [paramKey]="param.key"
+                          [paramSymbol]="param.symbol"
+                        />
+                      </mat-card-content>
+                    </mat-card>
+                  }
+                </div>
               </div>
-            </div>
-          </mat-tab>
+            </mat-tab>
           <!-- ── Configurations tab ── -->
-        <mat-tab label="Configurations">
-          <div class="tab-content">
-            <app-scenario-configurations
-              [scenarioId]="scenario.id"
-            />
-          </div>
-        </mat-tab>
+            <mat-tab label="Configurations">
+              <div class="tab-content">
+                <app-scenario-configurations
+                  [scenarioId]="scenario.id"
+                />
+              </div>
+            </mat-tab>
+          }
         </mat-tab-group>
       }
 
