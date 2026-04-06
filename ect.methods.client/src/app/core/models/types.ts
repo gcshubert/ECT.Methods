@@ -4,6 +4,7 @@ export interface ScientificValue {
   exponent: number;
 }
 
+
 // ─── Scenario ───────────────────────────────────────────────────────────────
 export interface Scenario {
   id: number;
@@ -150,7 +151,7 @@ export interface HierarchicalStep {
   parentNodeId?: string | null;
   rollupOperator?: string | null; // Sum, Product, WeightedSum, etc.
   weight: number;         // Default 1.0
-  baseValue?: number | null;
+  baseValue?: ScientificValue | null;
   children?: HierarchicalStep[]; // Populated locally or via Rollup result
 }
 
@@ -389,7 +390,7 @@ export interface CreateHierarchicalStepDto {
   rollupOperator?: string;
   weight: number;
   parentNodeId?: string;
-  baseValue?: number | null; 
+  baseValue?: ScientificValue | null; 
 }
 
 export interface CreateHierarchicalStepWithParametersDto {
@@ -410,7 +411,7 @@ export interface HierarchicalStepDto {
   parentNodeIds?: string[];            // full DAG support
   rollupOperator?: string | null;
   weight: number;
-  baseValue?: number | null;
+  baseValue?: ScientificValue | null;
 }
 export interface UpdateHierarchicalStepDto {
   name?: string;
@@ -420,5 +421,5 @@ export interface UpdateHierarchicalStepDto {
   type?: string;
   rollupOperator?: string;
   weight?: number;
-  baseValue?: number;
+  baseValue?: ScientificValue;
 }

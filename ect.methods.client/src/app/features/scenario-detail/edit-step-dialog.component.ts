@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { UpdateHierarchicalStepDto } from '../../core/models/types';
+import { UpdateHierarchicalStepDto, ScientificValue } from '../../core/models/types';
 import { toDouble, fromDouble } from '../../core/utils/math.utils';
 import { from, concatMap } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
@@ -21,7 +21,7 @@ interface StepNode {
   role: string;
   rollupOperator?: string | null;
   weight?: number | null;
-  baseValue?: number | null;
+  baseValue?: ScientificValue | null;
   children?: StepNode[];
 }
 
@@ -71,14 +71,13 @@ export class EditStepDialogComponent implements OnInit {
     const node = this.data.stepNode;
 
     // Pre-populate E/C/k/T from leaf children by role
-    // Track 4 TODO: decompose baseValue back to coefficient/exponent
-    // once UsesEdge carries ScientificValueDto instead of plain double
     for (const child of node.children ?? []) {
+      const baseValue = child.baseValue ?? { coefficient: 1.0, exponent: 0 };
       switch (child.role) {
-        case 'E': this.stepForm.patchValue({ energy: fromDouble(child.baseValue) }); break;
-        case 'T': this.stepForm.patchValue({ timeAvailable: fromDouble(child.baseValue) }); break;
-        case 'C': this.stepForm.patchValue({ control: fromDouble(child.baseValue) }); break;
-        case 'k': this.stepForm.patchValue({ complexity: fromDouble(child.baseValue) }); break;
+        case 'E': this.stepForm.patchValue({ energy: { coefficient: baseValue.coefficient, exponent: baseValue.exponent } }); break;
+        case 'T': this.stepForm.patchValue({ timeAvailable: { coefficient: baseValue.coefficient, exponent: baseValue.exponent } }); break;
+        case 'C': this.stepForm.patchValue({ control: { coefficient: baseValue.coefficient, exponent: baseValue.exponent } }); break;
+        case 'k': this.stepForm.patchValue({ complexity: { coefficient: baseValue.coefficient, exponent: baseValue.exponent } }); break;
       }
     }
   }
@@ -95,13 +94,12 @@ export class EditStepDialogComponent implements OnInit {
     const leafUpdates: { nodeId: string; dto: UpdateHierarchicalStepDto }[] = [];
 
     for (const child of node.children ?? []) {
-      let baseValue: number | undefined;
+      let baseValue: ScientificValue | undefined;
       switch (child.role) {
-        case 'E': baseValue = toDouble(fv.energy.coefficient, fv.energy.exponent); break;
-        case 'T': baseValue = toDouble(fv.timeAvailable.coefficient, fv.timeAvailable.exponent); break;
-        case 'C': baseValue = toDouble(fv.control.coefficient, fv.control.exponent); break;
-        case 'k': baseValue = toDouble(fv.complexity.coefficient, fv.complexity.exponent); break;
-      }
+        case 'E': baseValue = { coefficient: fv.energy.coefficient ?? 1.0, exponent: fv.energy.exponent ?? 0 }; break;
+        case 'T': baseValue = { coefficient: fv.timeAvailable.coefficient ?? 1.0, exponent: fv.timeAvailable.exponent ?? 0 }; break;
+        case 'C': baseValue = { coefficient: fv.control.coefficient ?? 1.0, exponent: fv.control.exponent ?? 0 }; break;
+        case 'k': baseValue = { coefficient: fv.complexity.coefficient ?? 1.0, exponent: fv.complexity.exponent ?? 0 }; break;      }
       if (baseValue !== undefined) {
         leafUpdates.push({
           nodeId: child.nodeId,

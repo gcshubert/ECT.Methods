@@ -74,7 +74,7 @@ export class AddStepDialogComponent {
           role: 'E', key: 'energy', name: formValue.name ?? '',
           label: 'E', type: 'E',
           description: 'Energy for this step',
-          baseValue: toDouble(formValue.energy.coefficient, formValue.energy.exponent),
+          baseValue: { coefficient: formValue.energy.coefficient ?? 1.0, exponent: formValue.energy.exponent ?? 0 },
           weight: 1,
           rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
@@ -82,7 +82,7 @@ export class AddStepDialogComponent {
           role: 'T', key: 'time', name: formValue.name ?? '',
           label: 'T', type: 'T',
           description: 'Time available for this step',
-          baseValue: toDouble(formValue.timeAvailable.coefficient, formValue.timeAvailable.exponent),
+          baseValue: { coefficient: formValue.timeAvailable.coefficient ?? 1.0, exponent: formValue.timeAvailable.exponent ?? 0 },
           weight: 1,
           rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
@@ -90,7 +90,7 @@ export class AddStepDialogComponent {
           role: 'C', key: 'control', name: formValue.name ?? '',
           label: 'C', type: 'C',
           description: 'Control capacity for this step',
-          baseValue: toDouble(formValue.control.coefficient, formValue.control.exponent),
+          baseValue: { coefficient: formValue.control.coefficient ?? 1.0, exponent: formValue.control.exponent ?? 0 },
           weight: 1,
           rollupOperator: formValue.rollupOperator ?? 'Sum'
         },
@@ -98,7 +98,7 @@ export class AddStepDialogComponent {
           role: 'k', key: 'complexity', name: formValue.name ?? '',
           label: 'k', type: 'k',
           description: 'Complexity for this step',
-          baseValue: toDouble(formValue.complexity.coefficient, formValue.complexity.exponent),
+          baseValue: { coefficient: formValue.complexity.coefficient ?? 1.0, exponent: formValue.complexity.exponent ?? 0 },
           weight: 1,
           rollupOperator: formValue.rollupOperator ?? 'Sum'
         }

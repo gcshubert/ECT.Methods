@@ -1,88 +1,89 @@
 <h2 mat-dialog-title>Add Process Step</h2>
-<mat-dialog-content [formGroup]="stepForm">
-  <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 10px;">
+<mat-dialog-content>
+  <form [formGroup]="stepForm">
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 10px;">
 
-    <mat-form-field appearance="outline">
-      <mat-label>Step Name</mat-label>
-      <input matInput formControlName="name" placeholder="e.g., Laser Source">
-    </mat-form-field>
-
-    <div style="display: flex; gap: 10px;">
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role">
-          <mat-option value="C">C</mat-option>
-          <!--@for (role of roles; track role) {
-    <mat-option [value]="role">{{ role }}</mat-option>
-    }-->
-          <!--for now leave disabled and defaulted-->
-        </mat-select>
+      <mat-form-field appearance="outline">
+        <mat-label>Step Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g., Laser Source">
       </mat-form-field>
 
-      <mat-form-field appearance="outline" style="flex: 1;">
-        <mat-label>Rollup Operator</mat-label>
-        <mat-select formControlName="rollupOperator">
-          @for (op of operators; track op) {
-          <mat-option [value]="op">{{ op }}</mat-option>
-          }
-        </mat-select>
+      <div style="display: flex; gap: 10px;">
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="C">C</mat-option>
+            <!--@for (role of roles; track role) {
+            <mat-option [value]="role">{{ role }}</mat-option>
+            }-->
+            <!--for now leave disabled and defaulted-->
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Rollup Operator</mat-label>
+          <mat-select formControlName="rollupOperator">
+            @for (op of operators; track op) {
+            <mat-option [value]="op">{{ op }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="param-grid">
+        <div formGroupName="energy" class="param-row">
+          <mat-form-field appearance="outline" class="param-coeff-field">
+            <mat-label>E Coeff</mat-label>
+            <input matInput type="number" formControlName="coefficient">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="param-exp-field">
+            <mat-label>Exp</mat-label>
+            <input matInput type="number" formControlName="exponent">
+          </mat-form-field>
+        </div>
+
+        <div formGroupName="control" class="param-row">
+          <mat-form-field appearance="outline" class="param-coeff-field">
+            <mat-label>C Coeff</mat-label>
+            <input matInput type="number" formControlName="coefficient">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="param-exp-field">
+            <mat-label>Exp</mat-label>
+            <input matInput type="number" formControlName="exponent">
+          </mat-form-field>
+        </div>
+
+        <div formGroupName="complexity" class="param-row">
+          <mat-form-field appearance="outline" class="param-coeff-field">
+            <mat-label>k Coeff</mat-label>
+            <input matInput type="number" formControlName="coefficient">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="param-exp-field">
+            <mat-label>Exp</mat-label>
+            <input matInput type="number" formControlName="exponent">
+          </mat-form-field>
+        </div>
+
+        <div formGroupName="timeAvailable" class="param-row">
+          <mat-form-field appearance="outline" class="param-coeff-field">
+            <mat-label>T Coeff</mat-label>
+            <input matInput type="number" formControlName="coefficient">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="param-exp-field">
+            <mat-label>Exp</mat-label>
+            <input matInput type="number" formControlName="exponent">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Weight (for WeightedSum)</mat-label>
+        <input matInput type="number" formControlName="weight">
       </mat-form-field>
+
     </div>
-
-    <div class="param-grid">
-      <div formGroupName="energy" class="param-row">
-        <mat-form-field appearance="outline" class="param-coeff-field">
-          <mat-label>E Coeff</mat-label>
-          <input matInput type="number" formControlName="coefficient">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="param-exp-field">
-          <mat-label>Exp</mat-label>
-          <input matInput type="number" formControlName="exponent">
-        </mat-form-field>
-      </div>
-
-      <div formGroupName="control" class="param-row">
-        <mat-form-field appearance="outline" class="param-coeff-field">
-          <mat-label>C Coeff</mat-label>
-          <input matInput type="number" formControlName="coefficient">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="param-exp-field">
-          <mat-label>Exp</mat-label>
-          <input matInput type="number" formControlName="exponent">
-        </mat-form-field>
-      </div>
-
-      <div formGroupName="complexity" class="param-row">
-        <mat-form-field appearance="outline" class="param-coeff-field">
-          <mat-label>k Coeff</mat-label>
-          <input matInput type="number" formControlName="coefficient">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="param-exp-field">
-          <mat-label>Exp</mat-label>
-          <input matInput type="number" formControlName="exponent">
-        </mat-form-field>
-      </div>
-
-      <div formGroupName="timeAvailable" class="param-row">
-        <mat-form-field appearance="outline" class="param-coeff-field">
-          <mat-label>T Coeff</mat-label>
-          <input matInput type="number" formControlName="coefficient">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="param-exp-field">
-          <mat-label>Exp</mat-label>
-          <input matInput type="number" formControlName="exponent">
-        </mat-form-field>
-      </div>
-    </div>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Weight (for WeightedSum)</mat-label>
-      <input matInput type="number" formControlName="weight">
-    </mat-form-field>
-
-  </div>
+  </form>
 </mat-dialog-content>
-
 <mat-dialog-actions align="end">
   <span *ngIf="stepForm.invalid" style="color: red; font-size: 12px; margin-right: 10px;">
     Form is Invalid (Check Parameters)

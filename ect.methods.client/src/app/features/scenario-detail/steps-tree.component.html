@@ -14,7 +14,7 @@
         <span class="role-badge role-{{node.role}}">{{ node.role }}</span>
         <span class="node-label">{{ node.label }}</span>
         <span class="base-value" *ngIf="node.baseValue != null">
-          {{ node.baseValue }}
+          {{ formatScientificValue(node.baseValue) }}
         </span>
       </div>
     </mat-tree-node>
@@ -50,7 +50,7 @@
           <span class="role-badge role-{{child.role}}">{{ child.role }}</span>
           <span class="node-label">{{ child.label }}</span>
           <span class="base-value" *ngIf="child.baseValue != null">
-            {{ child.baseValue }}
+            {{ formatScientificValue(child.baseValue) }}
           </span>
         </div>
       </div>

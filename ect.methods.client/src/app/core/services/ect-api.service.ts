@@ -378,7 +378,7 @@ export class EctApiService {
   deleteEdge(scenarioId: number, edgeId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/Graph/scenario/${scenarioId}/edges/${edgeId}`);
   }
-  getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStep[]> {
+  getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStepDto[]> {
     // Use 'this.base' to match the other methods
     // Ensure the route matches your HierarchicalController [Route] attribute
     return this.http.get<HierarchicalStep[]>(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`);

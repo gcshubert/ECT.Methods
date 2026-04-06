@@ -10,7 +10,7 @@ import { AddStepDialogComponent } from './add-step-dialog.component';
 import { EditStepDialogComponent } from './edit-step-dialog.component';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { HierarchicalStepDto } from '../../core/models/types';
+import { HierarchicalStepDto, ScientificValue } from '../../core/models/types';
 
 interface StepNode {
   nodeId: string;
@@ -21,7 +21,7 @@ interface StepNode {
   isLeaf?: boolean;
   rollupOperator?: string | null;
   weight?: number | null;
-  baseValue?: number | null;
+  baseValue?: ScientificValue | null;
   effectiveValue?: number | null;
   weightedContribution?: number | null;
   isBottleneck?: boolean;
@@ -102,7 +102,10 @@ export class StepsTreeComponent implements OnInit {
       if (s.parentNodeId && nodeMap.has(s.parentNodeId)) {
         nodeMap.get(s.parentNodeId)!.children!.push(node);
       } else {
-        roots.push(node);
+        // Only anchor nodes (role='k', id doesn't end in '-k') become roots
+        // Leaf parameter nodes without a recognised parent are orphans — skip them
+        const isAnchor = s.role === 'k' && !s.nodeId.endsWith('-k');
+        if (isAnchor) roots.push(node);
       }
     }
 
@@ -134,35 +137,26 @@ export class StepsTreeComponent implements OnInit {
   }
 
   deleteStep(node: StepNode) {
-    const leafLabels = (node.children ?? [])
-      .map(c => c.role)
-      .join(', ');
-
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       panelClass: 'dark-dialog',
       data: {
         title: 'Delete Step',
-        message: `Delete "${node.label}" and its parameters (${leafLabels})? This cannot be undone.`
+        message: `Delete "${node.label}" and its parameters? This cannot be undone.`
       }
     });
 
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (!confirmed) return;
-
-      const scenarioId = +this.scenarioId();
-      const toDelete = [node, ...(node.children ?? [])];
-      let completed = 0;
-
-      for (const n of toDelete) {
-        this.api.deleteHierarchicalStep(scenarioId, n.nodeId).subscribe({
-          next: () => {
-            completed++;
-            if (completed === toDelete.length) this.loadSteps();
-          },
-          error: (err) => console.error(`Failed to delete node ${n.nodeId}:`, err)
-        });
-      }
+      this.api.deleteHierarchicalStep(+this.scenarioId(), node.nodeId).subscribe({
+        next: () => this.loadSteps(),
+        error: (err) => console.error(`Failed to delete step ${node.nodeId}:`, err)
+      });
     });
+  }
+
+  formatScientificValue(value: ScientificValue | null): string {
+    if (!value) return '';
+    return `${value.coefficient} × 10^${value.exponent}`;
   }
 }
