@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   Scenario,
   CreateScenarioRequest,
@@ -38,7 +39,9 @@ import {
   UpdateEdgeRequest,
   HierarchicalStep,
   HierarchicalStepDto,
-  CreateHierarchicalStepWithParametersDto,
+  HierarchicalStepDtoRaw,
+  mapHierarchicalStepDto,
+  CreateHierarchicalStepDto,
   UpdateHierarchicalStepDto
 } from '../models/types';
 
@@ -265,6 +268,7 @@ export class EctApiService {
       payload
     );
   }
+
   // ─── Phase 5: Scenario Configurations ──────────────────────────────────
 
   getConfigurations(scenarioId: number): Observable<ScenarioConfiguration[]> {
@@ -334,8 +338,9 @@ export class EctApiService {
     return this.http.post<ParameterNode>(`${this.base}/Graph/scenario/${scenarioId}/nodes`, payload);
   }
 
-  createHierarchicalStep(scenarioId: number, payload: CreateHierarchicalStepWithParametersDto): Observable<any> {
-    return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/hierarchical-steps`, payload);
+  // Sends a flat CreateHierarchicalStepDto directly to the steps endpoint
+  createHierarchicalStep(scenarioId: number, payload: CreateHierarchicalStepDto): Observable<any> {
+    return this.http.post(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`, payload);
   }
 
   updateHierarchicalStep(scenarioId: number, stepId: string, payload: UpdateHierarchicalStepDto): Observable<HierarchicalStepDto> {
@@ -348,6 +353,12 @@ export class EctApiService {
   deleteHierarchicalStep(scenarioId: number, stepId: string): Observable<void> {
     return this.http.delete<void>(
       `${this.base}/scenarios/${scenarioId}/hierarchy/steps/${stepId}`
+    );
+  }
+
+  clearScenario(scenarioId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/scenarios/${scenarioId}/hierarchy/steps/clear-scenario/${scenarioId}`
     );
   }
 
@@ -378,9 +389,12 @@ export class EctApiService {
   deleteEdge(scenarioId: number, edgeId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/Graph/scenario/${scenarioId}/edges/${edgeId}`);
   }
+
   getHierarchicalSteps(scenarioId: number): Observable<HierarchicalStepDto[]> {
-    // Use 'this.base' to match the other methods
-    // Ensure the route matches your HierarchicalController [Route] attribute
-    return this.http.get<HierarchicalStep[]>(`${this.base}/scenarios/${scenarioId}/hierarchy/steps`);
+    return this.http.get<HierarchicalStepDtoRaw[]>(
+      `${this.base}/scenarios/${scenarioId}/hierarchy/steps`
+    ).pipe(
+      map(steps => steps.map(step => mapHierarchicalStepDto(step)))
+    );
   }
 }

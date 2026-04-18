@@ -2,20 +2,21 @@
 
 <mat-dialog-content>
   <form [formGroup]="stepForm">
+    <div class="dialog-content">
 
-    <!-- Step Name -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Step Name</mat-label>
-      <input matInput formControlName="name" />
-    </mat-form-field>
+      <!-- Step Name -->
+      <mat-form-field appearance="outline" class="dialog-form-field">
+        <mat-label>Step Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
 
-    <!-- Rollup Operator -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Rollup Operator</mat-label>
-      <mat-select formControlName="rollupOperator">
-        <mat-option *ngFor="let op of operators" [value]="op">{{ op }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Rollup Operator -->
+      <mat-form-field appearance="outline" class="dialog-form-field">
+        <mat-label>Rollup Operator</mat-label>
+        <mat-select formControlName="rollupOperator">
+          <mat-option *ngFor="let op of operators" [value]="op">{{ op }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
     <div class="section-label">Parameter Values</div>
 
@@ -74,7 +75,7 @@
         <input matInput type="number" formControlName="exponent" />
       </mat-form-field>
     </div>
-
+    </div>
   </form>
 </mat-dialog-content>
 

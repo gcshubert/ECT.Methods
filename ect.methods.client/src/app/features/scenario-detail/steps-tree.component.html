@@ -4,57 +4,41 @@
     <button mat-flat-button color="primary" (click)="addStep()">
       <mat-icon>add</mat-icon> Add Step
     </button>
+    <div class="toolbar-spacer"></div>
+    <button mat-flat-button color="warn" (click)="clearScenario()">
+      <mat-icon>clear</mat-icon> Clear Scenario
+    </button>
   </div>
 
   <mat-tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
 
-    <!-- Leaf node (E, T, C, k parameters) — no actions -->
+    <!-- Leaf node — parameter display -->
     <mat-tree-node *matTreeNodeDef="let node">
-      <div class="tree-node-row leaf-node">
+      <div class="tree-node-row leaf-node" [class.is-leaf]="node.isLeaf">
         <span class="role-badge role-{{node.role}}">{{ node.role }}</span>
         <span class="node-label">{{ node.label }}</span>
-        <span class="base-value" *ngIf="node.baseValue != null">
+        <span class="base-value" *ngIf="node.baseValue">
           {{ formatScientificValue(node.baseValue) }}
         </span>
       </div>
     </mat-tree-node>
 
-    <!-- Anchor node (step) — edit and delete on hover -->
+    <!-- Anchor node — step with inline edit/delete icons -->
     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
       <div class="tree-node-row anchor-node">
-        <button mat-icon-button
-                [attr.aria-label]="'Toggle ' + node.label"
-                (click)="toggleNode(node)">
-          <mat-icon>
-            {{ isExpanded(node) ? 'expand_more' : 'chevron_right' }}
-          </mat-icon>
-        </button>
         <span class="role-badge role-{{node.role}}">{{ node.role }}</span>
         <span class="node-label">{{ node.label }}</span>
-        <span class="node-actions">
-          <button mat-icon-button
-                  matTooltip="Edit step"
+        <div class="node-actions">
+          <button mat-icon-button matTooltip="Edit step"
                   (click)="editStep(node); $event.stopPropagation()">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button
-                  matTooltip="Delete step"
+          <button mat-icon-button matTooltip="Delete step"
                   (click)="deleteStep(node); $event.stopPropagation()">
             <mat-icon>delete</mat-icon>
           </button>
-        </span>
-      </div>
-
-      <div *ngIf="isExpanded(node)">
-        <div *ngFor="let child of node.children" class="tree-node-row leaf-node">
-          <span class="role-badge role-{{child.role}}">{{ child.role }}</span>
-          <span class="node-label">{{ child.label }}</span>
-          <span class="base-value" *ngIf="child.baseValue != null">
-            {{ formatScientificValue(child.baseValue) }}
-          </span>
         </div>
       </div>
-
     </mat-nested-tree-node>
   </mat-tree>
 

@@ -17,6 +17,7 @@ import { DomainPickerComponent } from './domain-picker.component';
 import { StepsTreeComponent } from './steps-tree.component';
 import { AddStepDialogComponent } from './add-step-dialog.component';
 import { ScenarioConfigurationsComponent } from './scenario-configurations.component';
+import { CreateScenarioDialogComponent } from '../scenarios/create-scenario-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
 /** Mini-form for a single ScientificValue (coefficient + exponent) */
@@ -95,6 +96,12 @@ function svGroup(fb: ReturnType<typeof inject<FormBuilder>>, val: ScientificValu
                       [processDomainId]="scenario.processDomainId"
                       (domainApplied)="onDomainApplied($event)"
                     />
+                  </div>
+
+                  <div style="margin-top:1.25rem">
+                    <button mat-flat-button color="primary" (click)="editScenario()">
+                      <mat-icon>edit</mat-icon> Edit Scenario
+                    </button>
                   </div>
 
                   @if (scenario.hasAnalysis) {
@@ -259,7 +266,35 @@ export class ScenarioDetailComponent implements OnInit {
 
   private dialog = inject(MatDialog);
 
+  editScenario(): void {
+    if (!this.scenario) return;
+    
+    const dialogRef = this.dialog.open(CreateScenarioDialogComponent, {
+      data: {
+        scenario: this.scenario,
+        isEdit: true
+      },
+      panelClass: 'dark-dialog',
+      width: '600px',
+      maxWidth: '90vw'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Refresh scenario data after update
+        this.api.getScenario(+this.id()).subscribe(updated => {
+          this.scenario = updated;
+        });
+      }
+    });
+  }
+
   openAddStepDialog(parentNode?: any): void {
+    // Debug scenario ID
+    console.log('Scenario ID from this.id():', this.id());
+    console.log('Type of this.id():', typeof this.id());
+    console.log('Scenario object:', this.scenario);
+    
     const dialogRef = this.dialog.open(AddStepDialogComponent, {
       data: {
         scenarioId: this.id(),

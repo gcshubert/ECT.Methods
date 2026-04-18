@@ -391,6 +391,11 @@ export interface CreateHierarchicalStepDto {
   weight: number;
   parentNodeId?: string;
   baseValue?: ScientificValue | null; 
+  // Parameter values for step anchor nodes (Apr 2026)
+  E?: ScientificValue | null;
+  C?: ScientificValue | null;
+  K?: ScientificValue | null;
+  T?: ScientificValue | null;
 }
 
 export interface CreateHierarchicalStepWithParametersDto {
@@ -401,6 +406,31 @@ export interface CreateHierarchicalStepWithParametersDto {
   parameters: CreateHierarchicalStepDto[]; // The 4 core coefficients
 }
 
+// Raw JSON response interface (lowercase properties)
+export interface HierarchicalStepDtoRaw {
+  nodeId: string;
+  key: string;
+  label: string;
+  description: string;
+  role: string;
+  parentNodeId?: string | null;
+  parentNodeIds?: string[];            // full DAG support
+  rollupOperator?: string | null;
+  weight: number;
+  baseValue?: ScientificValue | null;
+  // Parameter values from JSON response (lowercase)
+  e?: ScientificValue | null;
+  c?: ScientificValue | null;
+  k?: ScientificValue | null;
+  t?: ScientificValue | null;
+  // Provenance information for each parameter
+  eProvenance?: string | null;
+  cProvenance?: string | null;
+  kProvenance?: string | null;
+  tProvenance?: string | null;
+}
+
+// Mapped interface (uppercase properties for frontend use)
 export interface HierarchicalStepDto {
   nodeId: string;
   key: string;
@@ -412,6 +442,41 @@ export interface HierarchicalStepDto {
   rollupOperator?: string | null;
   weight: number;
   baseValue?: ScientificValue | null;
+  // Parameter values stored directly on step anchor nodes (Apr 2026)
+  E?: ScientificValue | null;
+  C?: ScientificValue | null;
+  K?: ScientificValue | null;
+  T?: ScientificValue | null;
+  // Provenance information for each parameter
+  EProvenance?: string | null;
+  CProvenance?: string | null;
+  KProvenance?: string | null;
+  TProvenance?: string | null;
+}
+
+// Mapping function to convert raw JSON to frontend interface
+export function mapHierarchicalStepDto(raw: HierarchicalStepDtoRaw): HierarchicalStepDto {
+  return {
+    nodeId: raw.nodeId,
+    key: raw.key,
+    label: raw.label,
+    description: raw.description,
+    role: raw.role,
+    parentNodeId: raw.parentNodeId,
+    parentNodeIds: raw.parentNodeIds,
+    rollupOperator: raw.rollupOperator,
+    weight: raw.weight,
+    baseValue: raw.baseValue,
+    // Map lowercase JSON properties to uppercase frontend properties
+    E: raw.e,
+    C: raw.c,
+    K: raw.k,
+    T: raw.t,
+    EProvenance: raw.eProvenance,
+    CProvenance: raw.cProvenance,
+    KProvenance: raw.kProvenance,
+    TProvenance: raw.tProvenance
+  };
 }
 export interface UpdateHierarchicalStepDto {
   name?: string;
@@ -422,4 +487,9 @@ export interface UpdateHierarchicalStepDto {
   rollupOperator?: string;
   weight?: number;
   baseValue?: ScientificValue;
+  // Parameter values for step anchor nodes (Apr 2026)
+  E?: ScientificValue;
+  C?: ScientificValue;
+  K?: ScientificValue;
+  T?: ScientificValue;
 }

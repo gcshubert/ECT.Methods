@@ -15,7 +15,7 @@ html, body {
 .mat-toolbar            { background: #0f172a !important; color: #f1f5f9 !important; }
 
 .mdc-tab__text-label    { color: #94a3b8 !important; }
-.mdc-tab--active .mdc-tab__text-label { color: #38bdf8 !important; }
+.mdc-tab--active .mdc-tab__text-label { color: #f1f5f9 !important; }
 .mdc-tab-indicator__content--underline { border-color: #38bdf8 !important; }
 
 .mat-mdc-card           { background: #1e293b !important; color: #e2e8f0 !important; }
@@ -39,7 +39,7 @@ html, body {
 .mat-mdc-dialog-container { background: #1e293b !important; color: #e2e8f0 !important; }
 .mat-mdc-dialog-title      { color: #f1f5f9 !important; }
 
-/* Dark dialog panel override (used by VariantEditorDialog) */
+/* Dark dialog panel override — apply panelClass: 'dark-dialog' when opening */
 .dark-dialog .mat-mdc-dialog-container,
 .dark-dialog .mdc-dialog__surface {
   background: #0f172a !important;
@@ -66,17 +66,84 @@ html, body {
 /* Monospace utility */
 .mono { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
 
+/* ── Shared dialog layout ───────────────────────────────────────────────────── */
+/* Used by create-scenario, add-step, edit-step dialogs */
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.dialog-form-field {
+  width: 100%;
+}
+
+.dialog-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.dialog-form-field-half {
+  flex: 1;
+}
+
+/* ── Edit / Add Step Dialog ─────────────────────────────────────────────── */
+.section-label {
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 12px 0 4px;
+}
+
+mat-dialog-content form > mat-form-field:first-of-type {
+  margin-top: 16px;
+}
+
+/* Parameter row — role badge + coefficient + ×10 + exponent */
+.param-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.sci-field  { flex: 3; }
+.exp-field  { flex: 1; min-width: 72px; }
+
+.times {
+  color: #64748b;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* Role badges */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  flex-shrink: 0;
+}
+
+.role-E { background: rgba(251,146,60,0.15); color: #fb923c; }
+.role-C { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.role-k { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.role-T { background: rgba(52,211,153,0.15); color: #34d399; }
+
 /* ── Add Step Dialog ─────────────────────────────────────────────────────── */
 .param-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-}
-
-.param-row {
-  display: flex;
-  gap: 4px;
-  align-items: flex-start;
 }
 
 .param-coeff-field {

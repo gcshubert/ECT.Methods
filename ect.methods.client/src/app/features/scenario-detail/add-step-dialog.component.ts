@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal } from '@angular/core'; // Added inject
+import { Component, Inject, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -7,12 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { EctApiService } from '../../core/services/ect-api.service';
-import { toDouble } from '../../core/utils/math.utils';
-import {
-  CreateHierarchicalStepDto,
-  CreateHierarchicalStepWithParametersDto,
-  ScientificValue
-} from '../../core/models/types';
+import { CreateHierarchicalStepDto } from '../../core/models/types';
 
 @Component({
   selector: 'app-add-step-dialog',
@@ -26,99 +21,93 @@ import {
     MatSelectModule,
     MatButtonModule
   ],
-  templateUrl: './add-step-dialog.component.html'
-})
+  templateUrl: './add-step-dialog.component.html',
+  })
 export class AddStepDialogComponent {
-  // Use inject() to ensure FormBuilder is ready before property initialization
   private fb = inject(FormBuilder);
   private api = inject(EctApiService);
 
-  roles = ['E', 'T', 'C', 'k'];
   operators = ['Sum', 'Product', 'WeightedSum', 'Max', 'Min'];
 
   stepForm = this.fb.group({
     name: ['', Validators.required],
-    role: ['C', Validators.required], // Default and leave active for submission testing
+    description: [''],
     rollupOperator: ['Sum', Validators.required],
-
-    // Scientific values for all parameters
-    energy: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-    control: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-    complexity: this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    energy:        this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    control:       this.fb.group({ coefficient: [1.0], exponent: [0] }),
+    complexity:    this.fb.group({ coefficient: [1.0], exponent: [0] }),
     timeAvailable: this.fb.group({ coefficient: [1.0], exponent: [0] }),
-
     weight: [1.0]
   });
 
   constructor(
     private dialogRef: MatDialogRef<AddStepDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { scenarioId: string, parentId?: string }
-  ) { }
-
-  ngOnInit() {
-    this.stepForm.get('role')?.disable();
+  ) { 
+    // Debug dialog data
+    console.log('AddStepDialog constructor - data:', this.data);
+    console.log('AddStepDialog constructor - scenarioId:', this.data.scenarioId);
+    console.log('AddStepDialog constructor - scenarioId type:', typeof this.data.scenarioId);
   }
 
   onSave(): void {
-    // Track 4 TODO: BaseValue should carry full ScientificValue (coefficient + exponent)
-    // once UsesEdge schema is revised to Dictionary<string, ScientificValueDto>.
+    if (!this.stepForm.valid) return;
 
-    if (this.stepForm.valid) {
-      const formValue = this.stepForm.getRawValue();
+    const fv = this.stepForm.getRawValue();
 
+    // Debug scenario ID
+    console.log('Dialog data:', this.data);
+    console.log('Raw scenario ID:', this.data.scenarioId);
+    console.log('Type of scenario ID:', typeof this.data.scenarioId);
 
-      //console.log('Form raw value:', JSON.stringify(formValue));
-
-      const parameters: CreateHierarchicalStepDto[] = [
-        {
-          role: 'E', key: 'energy', name: formValue.name ?? '',
-          label: 'E', type: 'E',
-          description: 'Energy for this step',
-          baseValue: { coefficient: formValue.energy.coefficient ?? 1.0, exponent: formValue.energy.exponent ?? 0 },
-          weight: 1,
-          rollupOperator: formValue.rollupOperator ?? 'Sum'
-        },
-        {
-          role: 'T', key: 'time', name: formValue.name ?? '',
-          label: 'T', type: 'T',
-          description: 'Time available for this step',
-          baseValue: { coefficient: formValue.timeAvailable.coefficient ?? 1.0, exponent: formValue.timeAvailable.exponent ?? 0 },
-          weight: 1,
-          rollupOperator: formValue.rollupOperator ?? 'Sum'
-        },
-        {
-          role: 'C', key: 'control', name: formValue.name ?? '',
-          label: 'C', type: 'C',
-          description: 'Control capacity for this step',
-          baseValue: { coefficient: formValue.control.coefficient ?? 1.0, exponent: formValue.control.exponent ?? 0 },
-          weight: 1,
-          rollupOperator: formValue.rollupOperator ?? 'Sum'
-        },
-        {
-          role: 'k', key: 'complexity', name: formValue.name ?? '',
-          label: 'k', type: 'k',
-          description: 'Complexity for this step',
-          baseValue: { coefficient: formValue.complexity.coefficient ?? 1.0, exponent: formValue.complexity.exponent ?? 0 },
-          weight: 1,
-          rollupOperator: formValue.rollupOperator ?? 'Sum'
-        }
-      ];
-
-      const payload: CreateHierarchicalStepWithParametersDto = {
-        stepName: formValue.name ?? 'New Step',
-        description: `Step for ${formValue.name}`,
-        sortOrder: 0,
-        parentNodeId: this.data.parentId,
-        parameters
-      };
-
-      this.api.createHierarchicalStep(+this.data.scenarioId, payload).subscribe({
-        next: () => {
-          console.log('Hierarchy saved: Step + 4 Parameters created in Neo4j.');
-          this.dialogRef.close(true);
-        },
-        error: (err) => console.error('Graph Save Failed:', err)
-      });
+    // Validate scenario ID
+    const scenarioId = parseInt(this.data.scenarioId, 10);
+    console.log('Parsed scenario ID:', scenarioId);
+    
+    if (isNaN(scenarioId) || scenarioId <= 0) {
+      console.error('Invalid scenario ID:', this.data.scenarioId);
+      return;
     }
+
+    console.log('Parsed scenario ID:', scenarioId);
+    console.log('Type of scenario ID:', typeof scenarioId);
+    console.log('Scenario ID:', scenarioId);
+
+    const payload: CreateHierarchicalStepDto = {
+      key: '',
+      name: fv.name ?? 'New Step',
+      label: fv.name ?? 'New Step',
+      description: fv.description ?? '',
+      role: 'k',
+      type: 'k',
+      rollupOperator: fv.rollupOperator ?? 'Sum',
+      weight: fv.weight ?? 1.0,
+      parentNodeId: this.data.parentId,
+      baseValue: { coefficient: fv.energy?.coefficient ?? 1.0, exponent: fv.energy?.exponent ?? 0 },
+      E: { coefficient: fv.energy?.coefficient ?? 1.0, exponent: fv.energy?.exponent ?? 0 },
+      C: { coefficient: fv.control?.coefficient ?? 1.0, exponent: fv.control?.exponent ?? 0 },
+      K: { coefficient: fv.complexity?.coefficient ?? 1.0, exponent: fv.complexity?.exponent ?? 0 },
+      T: { coefficient: fv.timeAvailable?.coefficient ?? 1.0, exponent: fv.timeAvailable?.exponent ?? 0 }
+    };
+
+    // Debug payload being sent
+    console.log('Create step payload:', payload);
+    console.log('Payload E:', payload.E);
+    console.log('Payload C:', payload.C);
+    console.log('Payload K:', payload.K);
+    console.log('Payload T:', payload.T);
+
+    this.api.createHierarchicalStep(scenarioId, payload).subscribe({
+      next: () => this.dialogRef.close(true),
+      error: (err) => {
+        console.error('Step creation failed:', err);
+        console.error('Error status:', err.status);
+        console.error('Error message:', err.message);
+        console.error('Error error:', err.error);
+        if (err.error && err.error.detail) {
+          console.error('Error detail:', err.error.detail);
+        }
+      }
+    });
   }
 }

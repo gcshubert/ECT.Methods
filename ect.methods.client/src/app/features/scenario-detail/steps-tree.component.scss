@@ -7,12 +7,24 @@
   --tree-line: #d1d1d1;
 }
 
+/* Toolbar layout */
+.tree-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
 .mat-tree {
   background: transparent;
 }
 
 .mat-tree-node, .mat-nested-tree-node {
-  color: #333;
+  color: #777;
   font-family: 'Roboto Mono', monospace; /* Technical feel */
 }
 
@@ -89,12 +101,22 @@
   padding-left: 8px;
 }
 
-/* Action buttons hidden until hover */
-.node-actions {
-  opacity: 0;
-  transition: opacity 0.2s;
+/* Action buttons always visible and inline */
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
 }
 
-.tree-node-row:hover .node-actions {
-  opacity: 1;
+.node-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto; /* Push actions to the right */
 }

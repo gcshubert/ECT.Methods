@@ -22,6 +22,10 @@ interface StepNode {
   rollupOperator?: string | null;
   weight?: number | null;
   baseValue?: ScientificValue | null;
+  E?: ScientificValue | null;
+  C?: ScientificValue | null;
+  K?: ScientificValue | null;
+  T?: ScientificValue | null;
   effectiveValue?: number | null;
   weightedContribution?: number | null;
   isBottleneck?: boolean;
@@ -49,32 +53,51 @@ export class StepsTreeComponent implements OnInit {
   private api = inject(EctApiService);
   private dialog = inject(MatDialog);
 
+  clearScenario() {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      panelClass: 'dark-dialog',
+      data: {
+        title: 'Clear Scenario',
+        message: 'Delete all steps and parameters for this scenario? This cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.api.clearScenario(+this.scenarioId()).subscribe({
+        next: () => this.loadSteps(),
+        error: (err) => console.error('Failed to clear scenario:', err)
+      });
+    });
+  }
+
   dataSource = new MatTreeNestedDataSource<StepNode>();
   childrenAccessor = (node: StepNode) => node.children ?? [];
   hasChild = (_: number, node: StepNode) =>
-    !!node.children && node.children.length > 0;
+    // All step anchor nodes (role="k") should be expandable, even if they have no parameters yet
+    node.role === 'k' || (!!node.children && node.children.length > 0);
 
-  expandedNodes = new Set<string>();
-
-  isExpanded(node: StepNode): boolean {
-    return this.expandedNodes.has(node.nodeId);
-  }
-
-  toggleNode(node: StepNode): void {
-    if (this.expandedNodes.has(node.nodeId)) {
-      this.expandedNodes.delete(node.nodeId);
-    } else {
-      this.expandedNodes.add(node.nodeId);
-    }
-  }
-
+  
   ngOnInit() {
     this.loadSteps();
   }
 
   loadSteps() {
     this.api.getHierarchicalSteps(+this.scenarioId()).subscribe({
-      next: (steps) => { this.dataSource.data = this.buildTree(steps); },
+      next: (steps) => {
+        console.log('API Response - steps from backend:', steps);
+        steps.forEach(step => {
+          console.log(`Step ${step.nodeId}:`, {
+            label: step.label,
+            E: step.E,
+            C: step.C,
+            K: step.K,
+            T: step.T
+          });
+        });
+        this.dataSource.data = this.buildTree(steps);
+      },
       error: (err) => console.error('Failed to load steps:', err)
     });
   }
@@ -84,6 +107,39 @@ export class StepsTreeComponent implements OnInit {
     const roots: StepNode[] = [];
 
     for (const s of steps) {
+      // Debug what's in the step from API
+      console.log(`buildTree - processing step ${s.nodeId}:`, {
+        label: s.label,
+        E: s.E,
+        C: s.C,
+        K: s.K,
+        T: s.T
+      });
+      
+      // Create parameter info children for display (but not separate nodes)
+      const paramChildren: StepNode[] = [];
+      if (s.E) paramChildren.push({
+        nodeId: s.nodeId + '-E', label: 'E',
+        role: 'E', isLeaf: true, baseValue: s.E, children: []
+      });
+      if (s.C) paramChildren.push({
+        nodeId: s.nodeId + '-C', label: 'C',
+        role: 'C', isLeaf: true, baseValue: s.C, children: []
+      });
+      if (s.K) paramChildren.push({
+        nodeId: s.nodeId + '-k', label: 'k',
+        role: 'k', isLeaf: true, baseValue: s.K, children: []
+      });
+      if (s.T) paramChildren.push({
+        nodeId: s.nodeId + '-T', label: 'T',
+        role: 'T', isLeaf: true, baseValue: s.T, children: []
+      });
+
+      const e = s.E;
+      const c = s.C;
+      const k = s.K;
+      const t = s.T;
+
       nodeMap.set(s.nodeId, {
         nodeId: s.nodeId,
         label: s.label,
@@ -92,26 +148,28 @@ export class StepsTreeComponent implements OnInit {
         parentNodeIds: s.parentNodeIds ?? [],
         rollupOperator: s.rollupOperator,
         weight: s.weight ?? null,
-        baseValue: s.baseValue,
-        children: []
+        baseValue: null,
+        E: e,
+        C: c,
+        K: k,
+        T: t,
+        children: paramChildren   // display parameters as children for UI
       });
     }
 
     for (const s of steps) {
       const node = nodeMap.get(s.nodeId)!;
       if (s.parentNodeId && nodeMap.has(s.parentNodeId)) {
-        nodeMap.get(s.parentNodeId)!.children!.push(node);
+        // Insert before param children so sub-steps appear above params
+        const parent = nodeMap.get(s.parentNodeId)!;
+        parent.children = [node, ...(parent.children ?? [])];
       } else {
-        // Only anchor nodes (role='k', id doesn't end in '-k') become roots
-        // Leaf parameter nodes without a recognised parent are orphans — skip them
-        const isAnchor = s.role === 'k' && !s.nodeId.endsWith('-k');
-        if (isAnchor) roots.push(node);
+        roots.push(node);
       }
     }
 
     return roots;
   }
-
   addStep() {
     const dialogRef = this.dialog.open(AddStepDialogComponent, {
       width: '750px',
@@ -125,6 +183,21 @@ export class StepsTreeComponent implements OnInit {
   }
 
   editStep(node: StepNode) {
+    // Debug node role and data
+    console.log('editStep called with node:', node);
+    console.log('Node role:', node.role);
+    console.log('Node type:', typeof node.role);
+    console.log('Node E:', node.E);
+    console.log('Node C:', node.C);
+    console.log('Node K:', node.K);
+    console.log('Node T:', node.T);
+    
+    // Only allow editing of anchor nodes (role="k"), not parameter leaf nodes
+    if (node.role !== 'k') {
+      console.log('Edit blocked: node role is not "k"');
+      return;
+    }
+    
     const dialogRef = this.dialog.open(EditStepDialogComponent, {
       width: '750px',
       maxWidth: '95vw',
@@ -137,6 +210,17 @@ export class StepsTreeComponent implements OnInit {
   }
 
   deleteStep(node: StepNode) {
+    // Debug node role
+    console.log('deleteStep called with node:', node);
+    console.log('Node role:', node.role);
+    console.log('Node type:', typeof node.role);
+    
+    // Only allow deleting of anchor nodes (role="k"), not parameter leaf nodes
+    if (node.role !== 'k') {
+      console.log('Delete blocked: node role is not "k"');
+      return;
+    }
+    
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       panelClass: 'dark-dialog',

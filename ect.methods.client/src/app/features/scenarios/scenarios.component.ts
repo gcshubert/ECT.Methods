@@ -135,7 +135,10 @@ export class ScenariosComponent implements OnInit {
   }
 
   openCreate() {
-    const ref = this.dialog.open(CreateScenarioDialogComponent, { width: '480px' });
+    const ref = this.dialog.open(CreateScenarioDialogComponent, {
+      width: '480px',
+      panelClass: 'dark-dialog'
+    });
     ref.afterClosed().subscribe((created) => { if (created) this.load(); });
   }
 

@@ -1,15 +1,15 @@
 <h2 mat-dialog-title>Add Process Step</h2>
 <mat-dialog-content>
   <form [formGroup]="stepForm">
-    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 10px;">
+    <div class="dialog-content">
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="dialog-form-field">
         <mat-label>Step Name</mat-label>
         <input matInput formControlName="name" placeholder="e.g., Laser Source">
       </mat-form-field>
 
-      <div style="display: flex; gap: 10px;">
-        <mat-form-field appearance="outline" style="flex: 1;">
+      <div class="dialog-form-row">
+        <mat-form-field appearance="outline" class="dialog-form-field-half">
           <mat-label>Role</mat-label>
           <mat-select formControlName="role">
             <mat-option value="C">C</mat-option>
@@ -20,7 +20,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-form-field appearance="outline" class="dialog-form-field-half">
           <mat-label>Rollup Operator</mat-label>
           <mat-select formControlName="rollupOperator">
             @for (op of operators; track op) {
